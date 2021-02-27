@@ -2,8 +2,10 @@ const BASE_URL = "http://localhost:3000";
 const COURSES_URL = `${BASE_URL}/courses`;
 
 let elements = {
-    coursePanel: function() {return document.getElementById('courses-panel') },
-    mainPanel: function() { return document.getElementById('main-panel') }
+    coursePanel: function() {return document.getElementById('courses-panel')},
+    mainPanel: function() { return document.getElementById('main-panel')},
+    assignmentRows: function() {return document.querySelectorAll(".assignment-row")} 
+ 
 };
 
 // ----------------------------------
@@ -110,11 +112,32 @@ function renderSubmitEditButton(courseID) {
     finishEditButton.setAttribute("data-course-id", courseID)
     finishEditButton.innerText = `Save Changes`
     elements.mainPanel().appendChild(finishEditButton)
-    finishEditButton.addEventListener("click", function(event) { console.log("triggered event listner to submit changes")})
+    finishEditButton.addEventListener("click", function(event) { submitEditChanges() })
+
+};
+
+function submitEditChanges() {
+    // console.log(elements.assignmentRows()[0].getElementsByTagName('input')[0].value)
+    // console.log(elements.assignmentRows()[0])
+
+    elements.assignmentRows().forEach( function(row) { 
+        const name = row.querySelector('.name').querySelector('input').value;
+        const score = row.querySelector('.score').querySelector('input').value;
+        const outOf = row.querySelector('.out-of').querySelector('input').value;
+        updateAssignment(name, score, outOf) })
+}
+
+function updateAssignment(name, score, outOf) {
+    console.log(name)
+    console.log(score)
+    console.log(outOf)
+
 
 }
+
 function displayAssignment(assignment, catElement) {
     const divElem = document.createElement('div');
+    divElem.className = "assignment-row"
     divElem.setAttribute("data-assignment-id", assignment.id)
     divElem.innerHTML = `
     <div class="name">${assignment.name}</div>
