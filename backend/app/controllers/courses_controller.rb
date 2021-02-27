@@ -7,7 +7,8 @@ class CoursesController < ApplicationController
 
         course = Course.find_by(id: params[:id])
         # binding.pry
-            render json: course, only: [:id, :name], include: [:categories]
+            # render json: course, only: [:id, :name], include: [:categories]
+            render json: CourseSerializer.new(course).to_serialized_json
     end
 
     def index

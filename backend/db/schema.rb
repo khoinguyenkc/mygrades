@@ -10,19 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_26_023820) do
+ActiveRecord::Schema.define(version: 2021_02_27_034711) do
 
   create_table "assignments", force: :cascade do |t|
     t.string "name"
     t.decimal "score", precision: 10, scale: 2
     t.decimal "out_of", precision: 10, scale: 2
     t.integer "category_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_assignments_on_category_id"
   end
 
   create_table "categories", force: :cascade do |t|
     t.string "name"
     t.integer "course_id"
+    t.decimal "weight", precision: 10, scale: 2
     t.index ["course_id"], name: "index_categories_on_course_id"
   end
 

@@ -13,5 +13,11 @@ Course.delete_all
 englishclass = Course.create(name: "English")
 calculusclass = Course.create(name: "Calculus")
 
-englishessays = Category.create(name: "english essays", course: englishclass)
+englishessays = Category.create(name: "english essays", weight: 0.70, course: englishclass)
 getty = Assignment.create(name: "gettysburg address analysis", score: 87, out_of: 100, category: englishessays)
+amuse = Assignment.create(name: "amuse ourselves to death critique", score: 92, out_of: 100, category: englishessays)
+gatsby = Assignment.create(name: "great gatsby analysis", score: 94, out_of: 100, category: englishessays)
+
+reading = Category.create(name: "reading", weight: 0.30, course: englishclass)
+read1 = Assignment.create(name: "reading 1", score: 10, out_of: 10, category: reading)
+read2 = Assignment.create(name: "reading 1", score: 8, out_of: 10, category: reading)
