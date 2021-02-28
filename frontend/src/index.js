@@ -55,6 +55,9 @@ function fetchAndDisplayCourseContent(courseID) {
 
 function displayCourseContent(json) {
     console.log(json)
+    //this can be called several times. so we have to clear it first:
+    elements.mainPanel().innerHTML = '';
+
     renderEditButton(json.id)
 
     json.categories.forEach( function(category) { 
@@ -113,26 +116,54 @@ function renderSubmitEditButton(courseID) {
     finishEditButton.setAttribute("data-course-id", courseID)
     finishEditButton.innerText = `Save Changes`
     elements.mainPanel().appendChild(finishEditButton)
-    finishEditButton.addEventListener("click", function(event) { submitEditChanges() })
+    finishEditButton.addEventListener("click", function(event) { submitEditChanges(courseID) })
 
 };
 
-function submitEditChanges() {
+function submitEditChanges(courseID) {
     // console.log(elements.assignmentRows()[0].getElementsByTagName('input')[0].value)
     // console.log(elements.assignmentRows()[0])
-    let row = elements.assignmentRows()[0]
-    // elements.assignmentRows().forEach( function(row) { 
+    // let row = elements.assignmentRows()[0]
+    elements.assignmentRows().forEach( function(row, index, array) { 
         const id = row.getAttribute("data-assignment-id");
         const name = row.querySelector('.name').querySelector('input').value;
         const score = row.querySelector('.score').querySelector('input').value;
         const outOf = row.querySelector('.out-of').querySelector('input').value;
-        updateAssignment(id, name, score, outOf) 
-    // })
+        const rerender = ( index === array.length - 1) ? true : false;
+            updateAssignment(id, name, score, outOf, rerender, courseID) 
+
+    })
+
+    // fetchAndDisplayCourseContent(courseID)
+    //this is equivalent to like reloading the component
 
 };
 
+function removeEditView() {
+    //revert to old view, no more input fields
+        // //turn elements into input fields
+        // let names = document.querySelectorAll("div.category-section .name")
+        // let scores = document.querySelectorAll("div.category-section .score")
+        // let outofs = document.querySelectorAll("div.category-section .out-of")
+        // function replaceWithInputField(elem) {
+        //     let oldText = elem.innerText
+        //     elem.innerHTML = `<input type="text" value="${oldText}" >`
+        // }
+        // names.forEach( function(elem) { replaceWithInputField(elem) })
+    
+        // scores.forEach( function(elem) { replaceWithInputField(elem) })
+        // outofs.forEach( function(elem) { replaceWithInputField(elem) })
+    
+        // //toggle off edit button,
+        // let editButton = document.getElementsByClassName("edit-button")[0]
+        // editButton.classList.add('hidden')
+        // // add finish edit button
+        // renderSubmitEditButton(courseID)
+    
+} 
 
-function updateAssignment(id, name, score, outOf) {
+
+function updateAssignment(id, name, score, outOf, rerender = false, courseID = null) {
     console.log(id)
     console.log(name)
     console.log(score)
@@ -156,7 +187,12 @@ function updateAssignment(id, name, score, outOf) {
 
     fetch(`${ASSIGNMENTS_URL}/${id}`, configurationObject).
     then( function(resource) { return resource.json() }).
-    then(function(json) { console.log(json) })
+    then(function(json) { 
+        console.log(json)
+    if (rerender === true ) {
+        fetchAndDisplayCourseContent(courseID)
+    }
+ })
 
 }
 

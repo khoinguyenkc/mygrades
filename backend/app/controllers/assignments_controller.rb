@@ -19,19 +19,10 @@ class AssignmentsController < ApplicationController
 
 
     def update
-        # => <ActionController::Parameters {
-        # "id"=>"1",
-        #  "name"=>"hahahgettysburg address analysis",
-        #   "score"=>"187.0", 
-        #   "out_of"=>"200.0", 
-        #   "controller"=>"assignments", 
-        #   "action"=>"update",
-        #    "assignment"=>{"id"=>"1", "name"=>"hahahgettysburg address analysis", "score"=>"187.0", "out_of"=>"200.0"}} permitted: false>
 
         assignment = Assignment.find_by(id: params[:id])
         assignment.update(assignment_params)
         assignment.save
-        binding.pry
 
         render json: assignment
 
@@ -43,6 +34,7 @@ class AssignmentsController < ApplicationController
     private
     def assignment_params
         params.require(:assignment).permit(:id, :name, :score, :out_of)
+        #need id or it say invalid sql and lock database..
     end
 
 end
