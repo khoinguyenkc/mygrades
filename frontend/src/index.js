@@ -1,5 +1,6 @@
 const BASE_URL = "http://localhost:3000";
 const COURSES_URL = `${BASE_URL}/courses`;
+const ASSIGNMENTS_URL = `${BASE_URL}/assignments`;
 
 let elements = {
     coursePanel: function() {return document.getElementById('courses-panel')},
@@ -121,17 +122,41 @@ function submitEditChanges() {
     // console.log(elements.assignmentRows()[0])
 
     elements.assignmentRows().forEach( function(row) { 
+        const id = row.getAttribute("data-assignment-id");
         const name = row.querySelector('.name').querySelector('input').value;
         const score = row.querySelector('.score').querySelector('input').value;
         const outOf = row.querySelector('.out-of').querySelector('input').value;
-        updateAssignment(name, score, outOf) })
-}
+        updateAssignment(id, name, score, outOf) 
+    })
 
-function updateAssignment(name, score, outOf) {
+};
+
+
+function updateAssignment(id, name, score, outOf) {
+    console.log(id)
     console.log(name)
     console.log(score)
     console.log(outOf)
+    //fetch request to api to update
+    let data = {
+        id,
+        name,
+        score,
+        out_of: outOf
+    };
 
+    let configurationObject = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(data)
+    };
+    
+    fetch(`${ASSIGNMENTS_URL}/${id}`, configurationObject).
+    then( function(resource) { return resource.json() }).
+    then(function(resource) { })
 
 }
 
