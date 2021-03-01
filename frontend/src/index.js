@@ -2,6 +2,10 @@ const BASE_URL = "http://localhost:3000";
 const COURSES_URL = `${BASE_URL}/courses`;
 const ASSIGNMENTS_URL = `${BASE_URL}/assignments`;
 
+let states = {
+    editModeOn: false
+};
+
 let elements = {
     coursePanel: function() {return document.getElementById('courses-panel')},
     mainPanel: function() { return document.getElementById('main-panel')},
@@ -120,7 +124,7 @@ function gradePercentage(json) {
 
 }
 function editScores(courseID) {
-    // console.log(courseID)
+    states.editModeOn = true;
     //turn elements into input fields
     let names = document.querySelectorAll("div.category-section .name")
     let scores = document.querySelectorAll("div.category-section .score")
@@ -165,8 +169,9 @@ function submitEditChanges(courseID) {
 
     })
 
-    // fetchAndDisplayCourseContent(courseID)
-    //this is equivalent to like reloading the component
+    //last assignment will call for rerender of course contetn
+    //then we update our state
+    states.editModeOn = false;
 
 };
 
