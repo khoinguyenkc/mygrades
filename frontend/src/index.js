@@ -59,7 +59,7 @@ function displayCourseContent(json) {
     elements.mainPanel().innerHTML = '';
 
     renderEditButton(json.id)
-
+    gradePercentage(json)
     json.categories.forEach( function(category) { 
 
         const catElement = document.createElement('div');
@@ -88,6 +88,39 @@ function renderEditButton(courseID) {
 
 }
 
+function rendergradePercentage(json) {
+
+
+}
+
+function gradePercentage(json) {    
+    console.log(`we're in grade percentage function`)
+    // console.log(json.categories[0].assignments[0])
+    //change this into js language
+    let percentages = []
+    let cats = json.categories
+    // #loop thru cats, and in there, loop thru assignments, 
+    cats.forEach( function(cat) {
+
+        let cat_score_sum = 0;
+        let cat_out_of_sum = 0;
+        cat.assignments.forEach (function(assignment) {
+            console.log(parseInt(assignment.score))
+            cat_score_sum += parseFloat(assignment.score)
+            console.log(cat_score_sum)
+
+            cat_out_of_sum += parseFloat(assignment.out_of)
+        })
+        let percentage = cat.weight * (cat_score_sum / cat_out_of_sum);
+        console.log(cat.weight)
+
+        percentages.push(percentage)
+    })
+
+    let answer = percentages.reduce( (acc, val) => acc + val);
+    console.log(answer)
+
+}
 function editScores(courseID) {
     // console.log(courseID)
     //turn elements into input fields
@@ -139,28 +172,6 @@ function submitEditChanges(courseID) {
 
 };
 
-function removeEditView() {
-    //revert to old view, no more input fields
-        // //turn elements into input fields
-        // let names = document.querySelectorAll("div.category-section .name")
-        // let scores = document.querySelectorAll("div.category-section .score")
-        // let outofs = document.querySelectorAll("div.category-section .out-of")
-        // function replaceWithInputField(elem) {
-        //     let oldText = elem.innerText
-        //     elem.innerHTML = `<input type="text" value="${oldText}" >`
-        // }
-        // names.forEach( function(elem) { replaceWithInputField(elem) })
-    
-        // scores.forEach( function(elem) { replaceWithInputField(elem) })
-        // outofs.forEach( function(elem) { replaceWithInputField(elem) })
-    
-        // //toggle off edit button,
-        // let editButton = document.getElementsByClassName("edit-button")[0]
-        // editButton.classList.add('hidden')
-        // // add finish edit button
-        // renderSubmitEditButton(courseID)
-    
-} 
 
 
 function updateAssignment(id, name, score, outOf, rerender = false, courseID = null) {

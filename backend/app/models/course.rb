@@ -1,10 +1,9 @@
 class Course < ApplicationRecord
     has_many :categories
 
-    def calculate_grade_percentage
+    def grade_percentage
         percentages = []
         cats = self.categories
-        binding.pry
         #loop thru cats, and in there, loop thru assignments, 
         cats.each do   |cat| 
             cat_score_sum = 0;
@@ -19,6 +18,9 @@ class Course < ApplicationRecord
 
         return percentages.sum
     end
+
+
+    
 
 
 
