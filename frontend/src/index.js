@@ -57,10 +57,10 @@ function displayCourseContent(json) {
     console.log(json)
     //this can be called several times. so we have to clear it first:
     elements.mainPanel().innerHTML = '';
-
+    
+    rendergradePercentage(json)
     renderEditButton(json.id)
-    gradePercentage(json)
-    json.categories.forEach( function(category) { 
+        json.categories.forEach( function(category) { 
 
         const catElement = document.createElement('div');
         catElement.className = "category-section";
@@ -89,14 +89,16 @@ function renderEditButton(courseID) {
 }
 
 function rendergradePercentage(json) {
-
+    //first time display
+    const percentage = gradePercentage(json)
+    const percentageElem = document.createElement('div');
+    percentageElem.className = "grade_percentage";
+    percentageElem.innerText = `Class Percentage: ${percentage}%`
+    elements.mainPanel().appendChild(percentageElem)
 
 }
 
 function gradePercentage(json) {    
-    console.log(`we're in grade percentage function`)
-    // console.log(json.categories[0].assignments[0])
-    //change this into js language
     let percentages = []
     let cats = json.categories
     // #loop thru cats, and in there, loop thru assignments, 
@@ -105,20 +107,16 @@ function gradePercentage(json) {
         let cat_score_sum = 0;
         let cat_out_of_sum = 0;
         cat.assignments.forEach (function(assignment) {
-            console.log(parseInt(assignment.score))
             cat_score_sum += parseFloat(assignment.score)
-            console.log(cat_score_sum)
 
             cat_out_of_sum += parseFloat(assignment.out_of)
         })
         let percentage = cat.weight * (cat_score_sum / cat_out_of_sum);
-        console.log(cat.weight)
 
         percentages.push(percentage)
     })
 
-    let answer = percentages.reduce( (acc, val) => acc + val);
-    console.log(answer)
+    return percentages.reduce( (acc, val) => acc + val, 0);
 
 }
 function editScores(courseID) {
