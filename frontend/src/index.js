@@ -25,7 +25,7 @@ let elements = {
 };
 
 class Course {
-    constructor(id, name, categories = null){
+    constructor(id, name, categories = []){
         this.id = id;
         this.name = name;
         this.categories = categories;
@@ -34,11 +34,11 @@ class Course {
 }
 
 class Category {
-    constructor(id, name, weight, course = null, assignments = null,){
+    constructor(id, name, weight, course = null, assignments = [],){
         this.id = id;
         this.name = name;
         this.weight = weight;
-        this.categories = categories;
+        this.assignments = assignments;
     }
 }
 
@@ -48,7 +48,7 @@ class Assignment {
         this.name = name;
         this.score = score;
         this.outOf = outOf;
-        this.categories = categories;
+        this.category = category;
     }
 }
 
@@ -72,8 +72,12 @@ function updateCourseObjects(json) {
         cat.assignments.forEach( function(assignment) {
             let newAssign = new Assignment(assignment.id, assignment.name, assignment.score, assignment.out_of, newCat)
             currentCourseObjects.assignments.push(newAssign)
+            //IMPORTANT!!! still need toasso categories to assignments, asso assignment to category
+            newAssign.category = newCat;
+            newCat.assignments.push(newAssign);
         })
-        
+        //asso categories to course
+        newCourse.categories.push(newCat)
     })
 
 }
@@ -120,7 +124,7 @@ function fetchAndDisplayCourseContent(courseID) {
     then( function(response) { return response.json() }).
     then( function(json) { 
         currentCourseJSON = json;
-        createCourseObject(json)
+        updateCourseObjects(json)
         displayCourseContent(json) })
 
 }
