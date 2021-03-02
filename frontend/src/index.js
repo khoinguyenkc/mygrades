@@ -2,10 +2,13 @@ const BASE_URL = "http://localhost:3000";
 const COURSES_URL = `${BASE_URL}/courses`;
 const ASSIGNMENTS_URL = `${BASE_URL}/assignments`;
 
+let currentCourseJSON;
+
 let states = {
     editModeOn: false
 };
 
+//we make these DOM nodes "live"
 let elements = {
     coursePanel: function() {return document.getElementById('courses-panel')},
     mainPanel: function() { return document.getElementById('main-panel')},
@@ -53,7 +56,9 @@ function fetchAndDisplayCourseContent(courseID) {
     //courseID will be a String!
     fetch(`${COURSES_URL}/${courseID}`).
     then( function(response) { return response.json() }).
-    then( function(json) { displayCourseContent(json) })
+    then( function(json) { 
+        currentCourseJSON = json;
+        displayCourseContent(json) })
 
 }
 
@@ -123,8 +128,16 @@ function gradePercentage(json) {
     return percentages.reduce( (acc, val) => acc + val, 0);
 
 }
+
 function editScores(courseID) {
     states.editModeOn = true;
+    //toggle off edit button,
+    let editButton = document.getElementsByClassName("edit-button")[0]
+    editButton.classList.add('hidden')
+    // add finish edit button
+    renderSubmitEditButton(courseID)
+
+        
     //turn elements into input fields
     let names = document.querySelectorAll("div.category-section .name")
     let scores = document.querySelectorAll("div.category-section .score")
@@ -138,13 +151,28 @@ function editScores(courseID) {
     scores.forEach( function(elem) { replaceWithInputField(elem) })
     outofs.forEach( function(elem) { replaceWithInputField(elem) })
 
-    //toggle off edit button,
-    let editButton = document.getElementsByClassName("edit-button")[0]
-    editButton.classList.add('hidden')
-    // add finish edit button
-    renderSubmitEditButton(courseID)
+
+    //add event listeners for all these input fields to 
+    //it will auto pass the EVENT as argument into the callback
+
+    names.forEach( function(node) { node.addEventListener("input", locallyUpdateCourseContent)} )
+    scores.forEach( function(node) { node.addEventListener("input", locallyUpdateCourseContent)} )
+    outofs.forEach( function(node) { node.addEventListener("input", locallyUpdateCourseContent)} )
+
 }
 
+function locallyUpdateCourseContent(event) {
+    //event.target would give u the dom node, 
+    //console log prinites old value but target.event.value gives u new value
+    console.log(event.target)
+    console.log(event.target.value)
+    //need to: update json
+    
+
+
+
+
+}
 function renderSubmitEditButton(courseID) {
     const finishEditButton = document.createElement('a');
     finishEditButton.className = "submit-edit-button";
@@ -215,9 +243,9 @@ function displayAssignment(assignment, catElement) {
     divElem.className = "assignment-row"
     divElem.setAttribute("data-assignment-id", assignment.id)
     divElem.innerHTML = `
-    <div class="name">${assignment.name}</div>
-    <div class="score">${assignment.score}</div>
-    <div class="out-of">${assignment.out_of}</div>
+    <div class="name" data-assignment-id="${assignment.id}">${assignment.name}</div>
+    <div class="score" data-assignment-id="${assignment.id}">${assignment.score}</div>
+    <div class="out-of" data-assignment-id="${assignment.id}">${assignment.out_of}</div>
 
     `
     //we need to tag them so we can respond to clicks and find out exactly what was clicked...
