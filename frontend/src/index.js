@@ -4,6 +4,14 @@ const ASSIGNMENTS_URL = `${BASE_URL}/assignments`;
 
 let currentCourseJSON;
 
+
+let currentCourseObjects = {
+    course: null,
+    categories: [],
+    assignments: []
+}
+
+
 let states = {
     editModeOn: false
 };
@@ -15,6 +23,60 @@ let elements = {
     assignmentRows: function() {return document.querySelectorAll(".assignment-row")} 
  
 };
+
+class Course {
+    constructor(id, name, categories = null){
+        this.id = id;
+        this.name = name;
+        this.categories = categories;
+    }
+
+}
+
+class Category {
+    constructor(id, name, weight, course = null, assignments = null,){
+        this.id = id;
+        this.name = name;
+        this.weight = weight;
+        this.categories = categories;
+    }
+}
+
+class Assignment {
+    constructor(id, name, score, outOf, category = null){
+        this.id = id;
+        this.name = name;
+        this.score = score;
+        this.outOf = outOf;
+        this.categories = categories;
+    }
+}
+
+
+function updateCourseObjects(json) {
+    //we're hoping these things are ferences and not moment-in-time copies!!!!
+
+    //clear assignments and categories
+    currentCourseObjects.categories = [];
+    currentCourseObjects.assignments = [];
+
+    //create course, null category
+    let newCourse = new Course(json.id, json.name)
+    currentCourseObjects.course = newCourse;
+    json.categories.forEach( function(cat) {
+        //create category, null assignments
+        let newCat = new Category(cat.id, cat.name, cat.weight, newCourse)
+        currentCourseObjects.categories.push(newCat);
+
+        //create assignment, asso categories to assignments, asso assignment to category
+        cat.assignments.forEach( function(assignment) {
+            let newAssign = new Assignment(assignment.id, assignment.name, assignment.score, assignment.out_of, newCat)
+            currentCourseObjects.assignments.push(newAssign)
+        })
+        
+    })
+
+}
 
 // ----------------------------------
 // --------UPON LOADING STUFF------- 
@@ -58,6 +120,7 @@ function fetchAndDisplayCourseContent(courseID) {
     then( function(response) { return response.json() }).
     then( function(json) { 
         currentCourseJSON = json;
+        createCourseObject(json)
         displayCourseContent(json) })
 
 }
@@ -167,7 +230,8 @@ function locallyUpdateCourseContent(event) {
     console.log(event.target)
     console.log(event.target.value)
     //need to: update json
-    
+    // currentCourseJSON
+
 
 
 
