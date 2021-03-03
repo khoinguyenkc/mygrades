@@ -31,7 +31,33 @@ class Course {
         this.categories = categories;
     }
 
+    
+
+};
+
+Course.prototype.grade_percentage =  function() {    
+    //we change the argument to no agument. it wil use the THIS to refer to the course.
+    let percentages = []
+    let cats = this.categories
+    // #loop thru cats, and in there, loop thru assignments, 
+    cats.forEach( function(cat) {
+
+        let catScoreSum = 0;
+        let catOutOfSum = 0;
+        cat.assignments.forEach (function(assignment) {
+            catScoreSum += parseFloat(assignment.score)
+
+            catOutOfSum += parseFloat(assignment.outOf)
+        })
+        let percentage = cat.weight * (catScoreSum / catOutOfSum);
+
+        percentages.push(percentage)
+    })
+
+    return percentages.reduce( (acc, val) => acc + val, 0);
+
 }
+
 
 class Category {
     constructor(id, name, weight, course = null, assignments = [],){
@@ -125,18 +151,21 @@ function fetchAndDisplayCourseContent(courseID) {
     then( function(json) { 
         currentCourseJSON = json;
         updateCourseObjects(json)
-        displayCourseContent(json) })
+        // displayCourseContent(json) 
+        //test:
+        displayCourseContent(currentCourseObjects.course) 
+
+    })
 
 }
-
-function displayCourseContent(json) {
-    console.log(json)
+function displayCourseContent(courseObject) {
+    console.log(courseObject)
     //this can be called several times. so we have to clear it first:
     elements.mainPanel().innerHTML = '';
     
-    rendergradePercentage(json)
-    renderEditButton(json.id)
-        json.categories.forEach( function(category) { 
+    rendergradePercentage(courseObject)
+    renderEditButton(courseObject.id)
+    courseObject.categories.forEach( function(category) { 
 
         const catElement = document.createElement('div');
         catElement.className = "category-section";
@@ -148,11 +177,29 @@ function displayCourseContent(json) {
         category.assignments.forEach( function(assignment) { displayAssignment(assignment, catElement) }
         )
     })
-
-
-
-
 }
+
+//OLD COPY KEEP as BACKUP
+// function displayCourseContent(json) {
+//     console.log(json)
+//     //this can be called several times. so we have to clear it first:
+//     elements.mainPanel().innerHTML = '';
+    
+//     rendergradePercentage(json)
+//     renderEditButton(json.id)
+//         json.categories.forEach( function(category) { 
+
+//         const catElement = document.createElement('div');
+//         catElement.className = "category-section";
+//         catElement.setAttribute("data-category-id", category.id);
+//         catElement.innerHTML = `${category.name}`
+//         elements.mainPanel().appendChild(catElement)
+
+           
+//         category.assignments.forEach( function(assignment) { displayAssignment(assignment, catElement) }
+//         )
+//     })
+// }
 
 function renderEditButton(courseID) {
     const editButton = document.createElement('a');
@@ -164,6 +211,7 @@ function renderEditButton(courseID) {
 
 }
 
+//i want to make this take a course object argument, insteadjson
 function rendergradePercentage(json) {
     //first time display
     const percentage = gradePercentage(json)
@@ -173,21 +221,20 @@ function rendergradePercentage(json) {
     elements.mainPanel().appendChild(percentageElem)
 
 }
-
-function gradePercentage(json) {    
+function gradePercentage(courseObject) {    
     let percentages = []
-    let cats = json.categories
+    let cats = courseObject.categories
     // #loop thru cats, and in there, loop thru assignments, 
     cats.forEach( function(cat) {
 
-        let cat_score_sum = 0;
-        let cat_out_of_sum = 0;
+        let catScoreSum = 0;
+        let catOutOfSum = 0;
         cat.assignments.forEach (function(assignment) {
-            cat_score_sum += parseFloat(assignment.score)
+            catScoreSum += parseFloat(assignment.score)
 
-            cat_out_of_sum += parseFloat(assignment.out_of)
+            catOutOfSum += parseFloat(assignment.outOf)
         })
-        let percentage = cat.weight * (cat_score_sum / cat_out_of_sum);
+        let percentage = cat.weight * (catScoreSum / catOutOfSum);
 
         percentages.push(percentage)
     })
@@ -195,6 +242,29 @@ function gradePercentage(json) {
     return percentages.reduce( (acc, val) => acc + val, 0);
 
 }
+
+//OLD COPY KEEP AS BACKUP
+// function gradePercentage(json) {    
+//     let percentages = []
+//     let cats = json.categories
+//     // #loop thru cats, and in there, loop thru assignments, 
+//     cats.forEach( function(cat) {
+
+//         let cat_score_sum = 0;
+//         let cat_out_of_sum = 0;
+//         cat.assignments.forEach (function(assignment) {
+//             cat_score_sum += parseFloat(assignment.score)
+
+//             cat_out_of_sum += parseFloat(assignment.out_of)
+//         })
+//         let percentage = cat.weight * (cat_score_sum / cat_out_of_sum);
+
+//         percentages.push(percentage)
+//     })
+
+//     return percentages.reduce( (acc, val) => acc + val, 0);
+
+// }
 
 function editScores(courseID) {
     states.editModeOn = true;
@@ -313,10 +383,26 @@ function displayAssignment(assignment, catElement) {
     divElem.innerHTML = `
     <div class="name" data-assignment-id="${assignment.id}">${assignment.name}</div>
     <div class="score" data-assignment-id="${assignment.id}">${assignment.score}</div>
-    <div class="out-of" data-assignment-id="${assignment.id}">${assignment.out_of}</div>
+    <div class="out-of" data-assignment-id="${assignment.id}">${assignment.outOf}</div>
 
     `
     //we need to tag them so we can respond to clicks and find out exactly what was clicked...
     catElement.appendChild(divElem)
 }
+
+
+//OLD COPY KEEP AS BACKUP
+// function displayAssignment(assignment, catElement) {
+//     const divElem = document.createElement('div');
+//     divElem.className = "assignment-row"
+//     divElem.setAttribute("data-assignment-id", assignment.id)
+//     divElem.innerHTML = `
+//     <div class="name" data-assignment-id="${assignment.id}">${assignment.name}</div>
+//     <div class="score" data-assignment-id="${assignment.id}">${assignment.score}</div>
+//     <div class="out-of" data-assignment-id="${assignment.id}">${assignment.out_of}</div>
+
+//     `
+//     //we need to tag them so we can respond to clicks and find out exactly what was clicked...
+//     catElement.appendChild(divElem)
+// }
 
