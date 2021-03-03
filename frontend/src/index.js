@@ -20,8 +20,10 @@ let states = {
 let elements = {
     coursePanel: function() {return document.getElementById('courses-panel')},
     mainPanel: function() { return document.getElementById('main-panel')},
-    assignmentRows: function() {return document.querySelectorAll(".assignment-row")} 
- 
+    assignmentsTable: function() { return document.getElementById('assignments-table')},
+    assignmentRows: function() {return document.querySelectorAll(".assignment-row")},
+    percentageElem: function() {return document.querySelector("#grade-percentage")}
+
 };
 
 class Course {
@@ -161,8 +163,10 @@ function fetchAndDisplayCourseContent(courseID) {
 function displayCourseContent(courseObject) {
     console.log(courseObject)
     //this can be called several times. so we have to clear it first:
-    elements.mainPanel().innerHTML = '';
-    
+    elements.assignmentsTable().innerHTML = '';
+    //should later change the html structure in index.thml so we dont celar innerHTML like this...
+
+
     rendergradePercentage(courseObject)
     renderEditButton(courseObject.id)
     courseObject.categories.forEach( function(category) { 
@@ -171,7 +175,7 @@ function displayCourseContent(courseObject) {
         catElement.className = "category-section";
         catElement.setAttribute("data-category-id", category.id);
         catElement.innerHTML = `${category.name}`
-        elements.mainPanel().appendChild(catElement)
+        elements.assignmentsTable().appendChild(catElement)
 
            
         category.assignments.forEach( function(assignment) { displayAssignment(assignment, catElement) }
@@ -211,14 +215,12 @@ function renderEditButton(courseID) {
 
 }
 
-//i want to make this take a course object argument, insteadjson
-function rendergradePercentage(json) {
-    //first time display
-    const percentage = gradePercentage(json)
-    const percentageElem = document.createElement('div');
-    percentageElem.className = "grade_percentage";
+function rendergradePercentage(courseObject) {
+    //goal: we want to make this able to display the first time AND to update
+    const percentage = gradePercentage(courseObject)
+    const percentageElem = elements.percentageElem()
+    percentageElem.classList.remove("hidden")
     percentageElem.innerText = `Class Percentage: ${percentage}%`
-    elements.mainPanel().appendChild(percentageElem)
 
 }
 function gradePercentage(courseObject) {    
@@ -292,22 +294,26 @@ function editScores(courseID) {
     //add event listeners for all these input fields to 
     //it will auto pass the EVENT as argument into the callback
 
-    names.forEach( function(node) { node.addEventListener("input", locallyUpdateCourseContent)} )
-    scores.forEach( function(node) { node.addEventListener("input", locallyUpdateCourseContent)} )
-    outofs.forEach( function(node) { node.addEventListener("input", locallyUpdateCourseContent)} )
+    names.forEach( function(node) { node.addEventListener("input", locallyUpdateAssignment)} )
+    scores.forEach( function(node) { node.addEventListener("input", locallyUpdateAssignment)} )
+    outofs.forEach( function(node) { node.addEventListener("input", locallyUpdateAssignment)} )
 
 }
 
-function locallyUpdateCourseContent(event) {
+function locallyUpdateAssignment(event) {
     //event.target would give u the dom node, 
     //console log prinites old value but target.event.value gives u new value
-    console.log(event.target)
-    console.log(event.target.value)
-    //need to: update json
-    // currentCourseJSON
 
-
-
+    //goal: read the node: what is the name and the id of the assignment
+    const ID = event.target.parentNode.getAttribute("data-assignment-id")
+    const attr = event.target.parentNode.getAttribute("data-label")
+    const newValue = event.target.value
+    //goal: locally update the course assignments:
+    const assignment = currentCourseObjects.assignments.find( function(element) { return element.id === parseInt(ID)})
+    assignment[attr] = newValue;
+    const newPercentage = currentCourseObjects.course.grade_percentage()
+    //goal: ask JS to rerender the grade percentage's value display
+    rendergradePercentage(currentCourseObjects.course) 
 
 
 }
@@ -381,9 +387,9 @@ function displayAssignment(assignment, catElement) {
     divElem.className = "assignment-row"
     divElem.setAttribute("data-assignment-id", assignment.id)
     divElem.innerHTML = `
-    <div class="name" data-assignment-id="${assignment.id}">${assignment.name}</div>
-    <div class="score" data-assignment-id="${assignment.id}">${assignment.score}</div>
-    <div class="out-of" data-assignment-id="${assignment.id}">${assignment.outOf}</div>
+    <div class="name" data-label="name" data-assignment-id="${assignment.id}">${assignment.name}</div>
+    <div class="score" data-label="score" data-assignment-id="${assignment.id}">${assignment.score}</div>
+    <div class="out-of" data-label="outOf" data-assignment-id="${assignment.id}">${assignment.outOf}</div>
 
     `
     //we need to tag them so we can respond to clicks and find out exactly what was clicked...
