@@ -22,8 +22,8 @@ let elements = {
     mainPanel: function() { return document.getElementById('main-panel')},
     assignmentsTable: function() { return document.getElementById('assignments-table')},
     assignmentRows: function() {return document.querySelectorAll(".assignment-row")},
-    percentageElem: function() {return document.querySelector("#grade-percentage")}
-
+    percentageElem: function() {return document.querySelector("#grade-percentage")},
+    newAssignmentButtons: function() {return document.querySelectorAll(".new-assignment-button")},
 };
 
 class Course {
@@ -170,22 +170,43 @@ function displayCourseContent(courseObject) {
     rendergradePercentage(courseObject)
     renderEditButton(courseObject.id)
     courseObject.categories.forEach( function(category) { 
-
+        //goal: create a category section
         const catElement = document.createElement('div');
         catElement.className = "category-section";
         catElement.setAttribute("data-category-id", category.id);
         catElement.innerHTML = `
-        ${category.name}
+        <div class="category-name">${category.name}</div>
         <div class="new-assignment-button" data-category-id="${category.id}">Add New Assignment</div>
         `
         elements.assignmentsTable().appendChild(catElement)
 
-           
-        category.assignments.forEach( function(assignment) { displayAssignment(assignment, catElement) }
-        )
+        //goal: add assignment rows to the category section
+        category.assignments.forEach( function(assignment) { displayAssignment(assignment, catElement) })
+
+        //goal: add a hidden div to deal with user adding new assignments 
+        const newAssignmentsDiv = document.createElement('div');
+        newAssignmentsDiv.className = "new-assignments-section hidden";
+        newAssignmentsDiv.setAttribute("data-category-id", category.id);
+        newAssignmentsDiv.innerHTML = `<div class="new-assignment-button" data-category-id="${category.id}">Add More</div>`
+        elements.assignmentsTable().appendChild(newAssignmentsDiv)
+
+        
     })
+    elements.newAssignmentButtons().forEach( function(button) { button.addEventListener("click", addNewAssignment)})
+
 }
 
+function addNewAssignment(event) {
+    console.log(event.target)
+    //un-hide new-assignments-section with the id
+    const catID = event.target.getAttribute('data-category-id');
+    console.log(catID)
+    const newAssDiv = document.querySelector(`.new-assignments-section[data-category-id="${catID}"]`)
+    // const newAssDiv = document.querySelector(`.new-assignments-section`)
+    // console.log(newAssDiv)
+    // div.card[data-id="2"]
+    newAssDiv.classList.remove("hidden")
+}
 //OLD COPY KEEP as BACKUP
 // function displayCourseContent(json) {
 //     console.log(json)
