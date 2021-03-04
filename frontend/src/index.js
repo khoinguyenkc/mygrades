@@ -174,7 +174,10 @@ function displayCourseContent(courseObject) {
         const catElement = document.createElement('div');
         catElement.className = "category-section";
         catElement.setAttribute("data-category-id", category.id);
-        catElement.innerHTML = `${category.name}`
+        catElement.innerHTML = `
+        ${category.name}
+        <div class="new-assignment-button" data-category-id="${category.id}">Add New Assignment</div>
+        `
         elements.assignmentsTable().appendChild(catElement)
 
            
