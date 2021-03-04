@@ -200,12 +200,21 @@ function addNewAssignment(event) {
     console.log(event.target)
     //un-hide new-assignments-section with the id
     const catID = event.target.getAttribute('data-category-id');
-    console.log(catID)
     const newAssDiv = document.querySelector(`.new-assignments-section[data-category-id="${catID}"]`)
-    // const newAssDiv = document.querySelector(`.new-assignments-section`)
-    // console.log(newAssDiv)
-    // div.card[data-id="2"]
     newAssDiv.classList.remove("hidden")
+    //add inputs into newAssDiv
+    let newRow = document.createElement("div")
+    newRow.className = "new-assignment-row"
+    newRow.setAttribute("data-category-id", catID)
+    newRow.innerHTML = `
+        <input type="text" name="name">
+        <input type="text" name="score">
+        <input type="text" name="out-of">
+
+    `
+    //append newRow...
+    newAssDiv.appendChild(newRow)
+
 }
 //OLD COPY KEEP as BACKUP
 // function displayCourseContent(json) {
