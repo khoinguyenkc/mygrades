@@ -24,6 +24,8 @@ let elements = {
     assignmentRows: function() {return document.querySelectorAll(".assignment-row")},
     percentageElem: function() {return document.querySelector("#grade-percentage")},
     newAssignmentButtons: function() {return document.querySelectorAll(".new-assignment-button")},
+    submitNewAssignmentsButtons: function() {return document.querySelectorAll(".submit-new-assignments-button")}
+    
 };
 
 class Course {
@@ -176,7 +178,7 @@ function displayCourseContent(courseObject) {
         catElement.setAttribute("data-category-id", category.id);
         catElement.innerHTML = `
         <div class="category-name">${category.name}</div>
-        <div class="new-assignment-button" data-category-id="${category.id}">Add New Assignment</div>
+        <div class="new-assignment-button" data-category-id="${category.id}">Add New Assignments</div>
         `
         elements.assignmentsTable().appendChild(catElement)
 
@@ -187,15 +189,32 @@ function displayCourseContent(courseObject) {
         const newAssignmentsDiv = document.createElement('div');
         newAssignmentsDiv.className = "new-assignments-section hidden";
         newAssignmentsDiv.setAttribute("data-category-id", category.id);
-        newAssignmentsDiv.innerHTML = `<div class="new-assignment-button" data-category-id="${category.id}">Add More</div>`
+        newAssignmentsDiv.innerHTML = `
+        <div class="new-assignment-button" data-category-id="${category.id}">Add More</div>
+        <div class="submit-new-assignments-button" data-category-id="${category.id}">Submit New Assignments</div>
+        `
         elements.assignmentsTable().appendChild(newAssignmentsDiv)
 
         
     })
     elements.newAssignmentButtons().forEach( function(button) { button.addEventListener("click", addNewAssignment)})
-
+    elements.submitNewAssignmentsButtons().forEach( function(button) { button.addEventListener("click", submitNewAssignments )})
 }
 
+function submitNewAssignments(event) {
+    //find the new-assignment-section div with that category id (dont use parent node, as that might change so easily)
+    const catID = event.target.getAttribute('data-category-id');
+    const newAssDiv = document.querySelector(`.new-assignments-section[data-category-id="${catID}"]`)
+    // console.log(newAssDiv)
+    //collect all new-assignment-rows
+    const rows = newAssDiv.querySelectorAll('.new-assignment-row')
+    //process each row: extract all relevant info and send!
+    // const name,
+    // const score
+    // const outOf
+    // make fetch requeset
+
+}
 function addNewAssignment(event) {
     console.log(event.target)
     //un-hide new-assignments-section with the id
@@ -207,10 +226,9 @@ function addNewAssignment(event) {
     newRow.className = "new-assignment-row"
     newRow.setAttribute("data-category-id", catID)
     newRow.innerHTML = `
-        <input type="text" name="name">
-        <input type="text" name="score">
-        <input type="text" name="out-of">
-
+        <input type="text" name="name" data-category-id="${catID}">
+        <input type="text" name="score" data-category-id="${catID}">
+        <input type="text" name="out-of" data-category-id="${catID}">
     `
     //append newRow...
     newAssDiv.appendChild(newRow)
