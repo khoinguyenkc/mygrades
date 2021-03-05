@@ -467,16 +467,49 @@ function displayAssignment(assignment, catElement) {
     divElem.className = "assignment-row"
     divElem.setAttribute("data-assignment-id", assignment.id)
     divElem.innerHTML = `
+    <div class="assignment-content" data-assignment-id="${assignment.id}">
     <div class="name" data-label="name" data-assignment-id="${assignment.id}">${assignment.name}</div>
     <div class="score" data-label="score" data-assignment-id="${assignment.id}">${assignment.score}</div>
     <div class="out-of" data-label="outOf" data-assignment-id="${assignment.id}">${assignment.outOf}</div>
-
-    `
-    //we need to tag them so we can respond to clicks and find out exactly what was clicked...
+    </div>
+    <div class="assignment-delete-button" data-assignment-id="${assignment.id}">
+        <a href="#">Delete</a>
+    </div>
+    `;
     catElement.appendChild(divElem)
+
+    let assignmentDeleteButton = function() { return document.querySelector(`.assignment-delete-button[data-assignment-id="${assignment.id}"]`) }
+
+    assignmentDeleteButton().addEventListener("click", function() {
+        const assignmentID = assignmentDeleteButton().getAttribute('data-assignment-id')
+        console.log(assignmentID)
+        // deleteAssignment(assignmentID)
+    } )    
+
 }
 
-
+function deleteAssignment(assignmentID) {
+    console.log(assignmentID)
+    // let data = {
+    //     id: assignmentID
+    // };
+        
+    // let configurationObject = {
+    //     method: "DELETE",
+    //     headers: {
+    //         "Content-Type": "application/json",
+    //         "Accept": "application/json"
+    //     },
+    //     body: JSON.stringify(data)
+    //     };
+        
+    //     fetch(`${ASSIGNMENTS_URL}/${assignmentID}`, configurationObject).
+    //         then( function(resource) { return resource.json() }).
+    //         then( function(json) { 
+    //             // if (rerender === true) { fetchAndDisplayCourseContent(currentCourseObjects.course.id) }
+    //      })
+        
+}
 //OLD COPY KEEP AS BACKUP
 // function displayAssignment(assignment, catElement) {
 //     const divElem = document.createElement('div');
