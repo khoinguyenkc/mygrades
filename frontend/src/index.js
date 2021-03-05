@@ -208,20 +208,18 @@ function submitNewAssignments(event) {
     //collect all new-assignment-rows
     const rows = newAssDiv.querySelectorAll('.new-assignment-row')
     //process each row: extract all relevant info and send!
-    rows.forEach( function(row) {
+    rows.forEach( function(row, index, array) {
         const name = row.querySelector('input[name="name"]').value
         const score = row.querySelector('input[name="score"]').value
         const outOf = row.querySelector('input[name="out-of"]').value
     // make fetch requeset
-    fetchCreateAssignment(catID,name,score,outOf)
+        const rerender = ( index === array.length - 1) ? true : false;
+        fetchCreateAssignment(catID,name,score,outOf, rerender)
 
     })
-    //rerender view after ALL rows updated:
-    fetchAndDisplayCourseContent(currentCourseObjects.course.id) 
-    console.log('did it ever get here?!')
 }
 
-function fetchCreateAssignment(catID,name,score,outOf) {
+function fetchCreateAssignment(catID,name,score,outOf, rerender = false) {
     let data = {
         category_id: catID,
         name,
@@ -241,8 +239,7 @@ function fetchCreateAssignment(catID,name,score,outOf) {
     fetch(`${ASSIGNMENTS_URL}`, configurationObject).
     then( function(resource) { return resource.json() }).
     then( function(json) { 
-        console.log('sent to api one new assignment')
-        //do not rerender anything!! other stuff might still be updating!!!!
+        if (rerender === true) { fetchAndDisplayCourseContent(currentCourseObjects.course.id) }
  })
 
 }
