@@ -1,5 +1,7 @@
 class AssignmentsController < ApplicationController
     def create 
+        message = {message: "we received your new assignment"}
+        render json: message
     end
 
     def show
