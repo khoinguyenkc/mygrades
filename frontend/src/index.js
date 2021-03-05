@@ -482,32 +482,30 @@ function displayAssignment(assignment, catElement) {
 
     assignmentDeleteButton().addEventListener("click", function() {
         const assignmentID = assignmentDeleteButton().getAttribute('data-assignment-id')
-        console.log(assignmentID)
-        // deleteAssignment(assignmentID)
+        deleteAssignment(assignmentID)
     } )    
 
 }
 
 function deleteAssignment(assignmentID) {
-    console.log(assignmentID)
-    // let data = {
-    //     id: assignmentID
-    // };
+    let data = {
+        id: assignmentID
+    };
         
-    // let configurationObject = {
-    //     method: "DELETE",
-    //     headers: {
-    //         "Content-Type": "application/json",
-    //         "Accept": "application/json"
-    //     },
-    //     body: JSON.stringify(data)
-    //     };
+    let configurationObject = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(data)
+        };
         
-    //     fetch(`${ASSIGNMENTS_URL}/${assignmentID}`, configurationObject).
-    //         then( function(resource) { return resource.json() }).
-    //         then( function(json) { 
-    //             // if (rerender === true) { fetchAndDisplayCourseContent(currentCourseObjects.course.id) }
-    //      })
+        fetch(`${ASSIGNMENTS_URL}/${assignmentID}`, configurationObject).
+            then( function(resource) { return resource.json() }).
+            then( function(json) { 
+                fetchAndDisplayCourseContent(currentCourseObjects.course.id) }
+         )
         
 }
 //OLD COPY KEEP AS BACKUP

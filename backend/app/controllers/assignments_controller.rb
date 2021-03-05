@@ -31,7 +31,15 @@ class AssignmentsController < ApplicationController
 
     end
 
-    def delete
+    def destroy
+        assignment = Assignment.find_by(id: params[:id])
+        binding.pry
+        assignment.delete
+        binding.pry
+
+        message = {message: "we received your new assignment"}
+        render json: message
+
     end
 
     private
