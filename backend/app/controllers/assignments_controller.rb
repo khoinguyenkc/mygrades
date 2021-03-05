@@ -1,5 +1,6 @@
 class AssignmentsController < ApplicationController
     def create 
+        assignment = Assignment.create(assignment_params)
         message = {message: "we received your new assignment"}
         render json: message
     end
@@ -35,7 +36,7 @@ class AssignmentsController < ApplicationController
 
     private
     def assignment_params
-        params.require(:assignment).permit(:id, :name, :score, :out_of)
+        params.require(:assignment).permit(:id, :name, :score, :out_of, :category_id)
         #need id or it say invalid sql and lock database..
     end
 

@@ -217,7 +217,8 @@ function submitNewAssignments(event) {
 
     })
     //rerender view after ALL rows updated:
-
+    fetchAndDisplayCourseContent(currentCourseObjects.course.id) 
+    console.log('did it ever get here?!')
 }
 
 function fetchCreateAssignment(catID,name,score,outOf) {
