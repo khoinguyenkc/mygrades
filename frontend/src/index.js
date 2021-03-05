@@ -488,6 +488,9 @@ function displayAssignment(assignment, catElement) {
 }
 
 function deleteAssignment(assignmentID) {
+    //find the section and change it to a "deleting..." message
+    const assignmentRow = document.querySelector(`.assignment-row[data-assignment-id="${assignmentID}"]`)
+    assignmentRow.innerHTML = "Deleting assignment..."
     let data = {
         id: assignmentID
     };
