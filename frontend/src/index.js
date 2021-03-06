@@ -26,7 +26,11 @@ let elements = {
     newAssignmentButtons: function() {return document.querySelectorAll(".new-assignment-button")},
     submitNewAssignmentsButtons: function() {return document.querySelectorAll(".submit-new-assignments-button")},
     editScoreButton: function() {return document.getElementById('edit-score-button')},
-    submitEditButton: function() {return document.getElementById('submit-edit-button')}
+    submitEditButton: function() {return document.getElementById('submit-edit-button')},
+    names: function() { return document.querySelectorAll("div.category-section .name")},
+    scores: function() { return document.querySelectorAll("div.category-section .score")},
+    outOfs: function() { return document.querySelectorAll("div.category-section .out-of")}
+
 };
 
 class Course {
@@ -124,7 +128,12 @@ function fetchAndDisplayCourseTitles() {
     then( function(json) { displayCourseTitles(json) })
 }
 
-fetchAndDisplayCourseTitles()
+function initializeApp() {
+    fetchAndDisplayCourseTitles()
+    elements.editScoreButton().addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
+
+}
+initializeApp()
 
 function displayCourseTitles(array) {
     console.log(array)
@@ -292,7 +301,9 @@ function renderEditButton(courseID) {
     const editScoreButton = elements.editScoreButton();
     editScoreButton.classList.remove('hidden')
     editScoreButton.setAttribute("data-course-id", courseID)
-    editScoreButton.addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
+
+
+    // editScoreButton.addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
 
     // const editButton = document.createElement('a');
     // editButton.className = "edit-button";
@@ -357,6 +368,7 @@ function gradePercentage(courseObject) {
 // }
 
 function editScores(courseID) {
+    console.log(`edit scores function was called`)
     states.editModeOn = true;
     //toggle off edit button,
     let editButton = document.getElementById("edit-score-button")
@@ -366,25 +378,24 @@ function editScores(courseID) {
 
         
     //turn elements into input fields
-    let names = document.querySelectorAll("div.category-section .name")
-    let scores = document.querySelectorAll("div.category-section .score")
-    let outofs = document.querySelectorAll("div.category-section .out-of")
+    let names = elements.names();
+    let scores = elements.scores();
+    let outOfs = elements.outOfs();
     function replaceWithInputField(elem) {
-        let oldText = elem.innerText
+        let oldText = elem.innerText;
         elem.innerHTML = `<input type="text" value="${oldText}" >`
+
     }
-    names.forEach( function(elem) { replaceWithInputField(elem) })
-
-    scores.forEach( function(elem) { replaceWithInputField(elem) })
-    outofs.forEach( function(elem) { replaceWithInputField(elem) })
-
+    elements.names().forEach( function(elem) { replaceWithInputField(elem) })
+    elements.scores().forEach( function(elem) { replaceWithInputField(elem) })
+    elements.outOfs().forEach( function(elem) { replaceWithInputField(elem) })
 
     //add event listeners for all these input fields to 
     //it will auto pass the EVENT as argument into the callback
 
-    names.forEach( function(node) { node.addEventListener("input", locallyUpdateAssignment)} )
-    scores.forEach( function(node) { node.addEventListener("input", locallyUpdateAssignment)} )
-    outofs.forEach( function(node) { node.addEventListener("input", locallyUpdateAssignment)} )
+    // elements.names().forEach( function(node) { node.addEventListener("input", locallyUpdateAssignment)} )
+    // elements.scores().forEach( function(node) { node.addEventListener("input", locallyUpdateAssignment)} )
+    // elements.outOfs().forEach( function(node) { node.addEventListener("input", locallyUpdateAssignment)} )
 
 }
 
@@ -431,6 +442,7 @@ function submitEditChanges(courseID) {
     //last assignment will call for rerender of course contetn
     //then we update our state
     states.editModeOn = false;
+    //turn off 'save changes' button
     const finishEditButton = elements.submitEditButton();
     finishEditButton.classList.add('hidden')
 
