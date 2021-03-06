@@ -24,8 +24,8 @@ let elements = {
     assignmentRows: function() {return document.querySelectorAll(".assignment-row")},
     percentageElem: function() {return document.querySelector("#grade-percentage")},
     newAssignmentButtons: function() {return document.querySelectorAll(".new-assignment-button")},
-    submitNewAssignmentsButtons: function() {return document.querySelectorAll(".submit-new-assignments-button")}
-    
+    submitNewAssignmentsButtons: function() {return document.querySelectorAll(".submit-new-assignments-button")},
+    editScoreButton: function() {return document.getElementById('edit-score-button')}
 };
 
 class Course {
@@ -286,12 +286,18 @@ function addNewAssignment(event) {
 // }
 
 function renderEditButton(courseID) {
-    const editButton = document.createElement('a');
-    editButton.className = "edit-button";
-    editButton.setAttribute("data-course-id", courseID)
-    editButton.innerText = `Edit Scores`
-    elements.mainPanel().appendChild(editButton)
-    editButton.addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
+    // console.log(document.getElementById('edit-score-button'))
+    const editScoreButton = elements.editScoreButton();
+    editScoreButton.classList.remove('hidden')
+    editScoreButton.setAttribute("data-course-id", courseID)
+    editScoreButton.addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
+
+    // const editButton = document.createElement('a');
+    // editButton.className = "edit-button";
+    // editButton.setAttribute("data-course-id", courseID)
+    // editButton.innerText = `Edit Scores`
+    // elements.mainPanel().appendChild(editButton)
+    // editButton.addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
 
 }
 
@@ -351,7 +357,7 @@ function gradePercentage(courseObject) {
 function editScores(courseID) {
     states.editModeOn = true;
     //toggle off edit button,
-    let editButton = document.getElementsByClassName("edit-button")[0]
+    let editButton = document.getElementById("edit-score-button")
     editButton.classList.add('hidden')
     // add finish edit button
     renderSubmitEditButton(courseID)
