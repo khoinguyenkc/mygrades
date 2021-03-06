@@ -25,7 +25,8 @@ let elements = {
     percentageElem: function() {return document.querySelector("#grade-percentage")},
     newAssignmentButtons: function() {return document.querySelectorAll(".new-assignment-button")},
     submitNewAssignmentsButtons: function() {return document.querySelectorAll(".submit-new-assignments-button")},
-    editScoreButton: function() {return document.getElementById('edit-score-button')}
+    editScoreButton: function() {return document.getElementById('edit-score-button')},
+    submitEditButton: function() {return document.getElementById('submit-edit-button')}
 };
 
 class Course {
@@ -405,11 +406,10 @@ function locallyUpdateAssignment(event) {
 
 }
 function renderSubmitEditButton(courseID) {
-    const finishEditButton = document.createElement('a');
-    finishEditButton.className = "submit-edit-button";
+    //find button, un-hide, add id,
+    const finishEditButton = elements.submitEditButton();
+    finishEditButton.classList.remove('hidden')
     finishEditButton.setAttribute("data-course-id", courseID)
-    finishEditButton.innerText = `Save Changes`
-    elements.mainPanel().appendChild(finishEditButton)
     finishEditButton.addEventListener("click", function(event) { submitEditChanges(courseID) })
 
 };
@@ -431,6 +431,9 @@ function submitEditChanges(courseID) {
     //last assignment will call for rerender of course contetn
     //then we update our state
     states.editModeOn = false;
+    const finishEditButton = elements.submitEditButton();
+    finishEditButton.classList.add('hidden')
+
 
 };
 
