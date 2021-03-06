@@ -58,7 +58,8 @@ Course.prototype.grade_percentage =  function() {
         percentages.push(percentage)
     })
 
-    return percentages.reduce( (acc, val) => acc + val, 0);
+    const rawPerc = percentages.reduce( (acc, val) => acc + val, 0);
+    return (rawPerc * 100).toFixed(2)
 
 }
 
@@ -303,7 +304,7 @@ function renderEditButton(courseID) {
 
 function rendergradePercentage(courseObject) {
     //goal: we want to make this able to display the first time AND to update
-    const percentage = gradePercentage(courseObject)
+    const percentage = courseObject.grade_percentage()
     const percentageElem = elements.percentageElem()
     percentageElem.classList.remove("hidden")
     percentageElem.innerText = `Class Percentage: ${percentage}%`

@@ -1,6 +1,6 @@
 class AssignmentsController < ApplicationController
     def create 
-        assignment = Assignment.create(assignment_params)
+        assignment = Assignment.create(assignment_params) if !params[:name].empty?
         message = {message: "we received your new assignment"}
         render json: message
     end
@@ -24,7 +24,7 @@ class AssignmentsController < ApplicationController
     def update
 
         assignment = Assignment.find_by(id: params[:id])
-        assignment.update(assignment_params)
+        assignment.update(assignment_params)  if !params[:name].empty?
         assignment.save
 
         render json: assignment
@@ -33,9 +33,7 @@ class AssignmentsController < ApplicationController
 
     def destroy
         assignment = Assignment.find_by(id: params[:id])
-        binding.pry
         assignment.delete
-        binding.pry
 
         message = {message: "we received your new assignment"}
         render json: message
