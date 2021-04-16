@@ -3,5 +3,15 @@
 }
 
 div {
-    border: 1px solid black;
+    /* border: 1px solid black; */
 }
+
+#course-menu-bar {
+    background-color: white;
+}
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+  }
+  

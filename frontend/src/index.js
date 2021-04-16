@@ -23,13 +23,15 @@ let elements = {
     assignmentsTable: function() { return document.getElementById('assignments-table')},
     assignmentRows: function() {return document.querySelectorAll(".assignment-row")},
     percentageElem: function() {return document.querySelector("#grade-percentage")},
+    courseTitleElem: function() {return document.querySelector("#course-title")},
     newAssignmentButtons: function() {return document.querySelectorAll(".new-assignment-button")},
     submitNewAssignmentsButtons: function() {return document.querySelectorAll(".submit-new-assignments-button")},
     editScoreButton: function() {return document.getElementById('edit-score-button')},
     submitEditButton: function() {return document.getElementById('submit-edit-button')},
     names: function() { return document.querySelectorAll("div.category-section .name")},
     scores: function() { return document.querySelectorAll("div.category-section .score")},
-    outOfs: function() { return document.querySelectorAll("div.category-section .out-of")}
+    outOfs: function() { return document.querySelectorAll("div.category-section .out-of")},
+    courseMenuBar: function() { return document.getElementById("course-menu-bar");}
 
 };
 
@@ -95,7 +97,7 @@ function updateCourseObjects(json) {
     //clear assignments and categories
     currentCourseObjects.categories = [];
     currentCourseObjects.assignments = [];
-
+    console.log(json)
     //create course, null category
     let newCourse = new Course(json.id, json.name)
     currentCourseObjects.course = newCourse;
@@ -130,10 +132,27 @@ function fetchAndDisplayCourseTitles() {
 
 function initializeApp() {
     fetchAndDisplayCourseTitles()
-    elements.editScoreButton().addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
+    elements.editScoreButton().addEventListener("click", function(event) { editScores(elements.editScoreButton().getAttribute("data-course-id"))})
+    window.onscroll = function() { makeCourseMenuSticky()};
 
 }
 initializeApp()
+
+
+
+
+// Add the sticky class to the navbar when you reach its scroll position. Remove "sticky" when you leave the scroll position
+function makeCourseMenuSticky() {
+    var sticky = elements.courseMenuBar().offsetTop;
+
+  if (window.pageYOffset >= sticky) {
+    elements.courseMenuBar().classList.add("sticky")
+  } else {
+    elements.courseMenuBar().classList.remove("sticky");
+  }
+}
+
+
 
 function displayCourseTitles(array) {
     console.log(array)
@@ -141,13 +160,15 @@ function displayCourseTitles(array) {
     console.log("hica nha")
     console.log(elements.coursePanel())
     array.forEach( function(course) { 
-        const courseElement = document.createElement('div');
-        courseElement.innerHTML =
-         `<a class="course-link" href="#" data-course-id="${course.id}">${course.name}</a>`
-        // courseElement.className = "course-link";
-        // courseElement.setAttribute("data-id", course.id);
-        // courseElement.setAttribute("href", `#`); //for link hover effect
-        // courseElement.innerHTML = course.name;
+        // const courseElement = document.createElement('div');
+        const courseElement = document.createElement('a');
+
+        // courseElement.innerHTML =
+        //  `<a class="course-link huge ui button" href="#" data-course-id="${course.id}">${course.name}</a>`
+        courseElement.className = "course-link huge ui button";
+        courseElement.setAttribute("data-course-id", course.id);
+        courseElement.setAttribute("href", `#`); //for link hover effect
+        courseElement.innerHTML = course.name;
         elements.coursePanel().appendChild(courseElement);
 
         courseElement.addEventListener("click", function(event) { 
@@ -160,6 +181,7 @@ function displayCourseTitles(array) {
 
 
 function fetchAndDisplayCourseContent(courseID) {
+    console.log(`fetchAndDisplayCourseContent was called`)
     //courseID will be a String!
     fetch(`${COURSES_URL}/${courseID}`).
     then( function(response) { return response.json() }).
@@ -179,7 +201,7 @@ function displayCourseContent(courseObject) {
     elements.assignmentsTable().innerHTML = '';
     //should later change the html structure in index.thml so we dont celar innerHTML like this...
 
-
+    renderCourseTitle(courseObject)
     rendergradePercentage(courseObject)
     renderEditButton(courseObject.id)
     courseObject.categories.forEach( function(category) { 
@@ -188,8 +210,12 @@ function displayCourseContent(courseObject) {
         catElement.className = "category-section";
         catElement.setAttribute("data-category-id", category.id);
         catElement.innerHTML = `
-        <div class="category-name">${category.name}</div>
-        <div class="new-assignment-button" data-category-id="${category.id}">Add New Assignments</div>
+        <h3 class="category-name header">${category.name}</h3>
+        <div class="new-assignment-button" data-category-id="${category.id}">
+            <div class=" ui primary button" >Add New Assignments</div>
+        </div>
+        <div class="ui middle aligned divided list category-main-content">
+        </div>
         `
         elements.assignmentsTable().appendChild(catElement)
 
@@ -201,8 +227,9 @@ function displayCourseContent(courseObject) {
         newAssignmentsDiv.className = "new-assignments-section hidden";
         newAssignmentsDiv.setAttribute("data-category-id", category.id);
         newAssignmentsDiv.innerHTML = `
-        <div class="new-assignment-button" data-category-id="${category.id}">Add More</div>
-        <div class="submit-new-assignments-button" data-category-id="${category.id}">Submit New Assignments</div>
+        <div class="submit-new-assignments-button" data-category-id="${category.id}"><button class="ui primary button" >Submit New Assignments</button></div>
+        <div class="new-assignment-button" data-category-id="${category.id}"><button class="ui button">Add One More Assignment</button></div>
+
         `
         elements.assignmentsTable().appendChild(newAssignmentsDiv)
 
@@ -214,7 +241,7 @@ function displayCourseContent(courseObject) {
 
 function submitNewAssignments(event) {
     //find the new-assignment-section div with that category id (dont use parent node, as that might change so easily)
-    const catID = event.target.getAttribute('data-category-id');
+    const catID = event.target.parentNode.getAttribute('data-category-id');
     const newAssDiv = document.querySelector(`.new-assignments-section[data-category-id="${catID}"]`)
     //collect all new-assignment-rows
     const rows = newAssDiv.querySelectorAll('.new-assignment-row')
@@ -250,15 +277,28 @@ function fetchCreateAssignment(catID,name,score,outOf, rerender = false) {
     fetch(`${ASSIGNMENTS_URL}`, configurationObject).
     then( function(resource) { return resource.json() }).
     then( function(json) { 
-        if (rerender === true) { fetchAndDisplayCourseContent(currentCourseObjects.course.id) }
+        if (rerender === true) { 
+            fetchAndDisplayCourseContent(currentCourseObjects.course.id) }
  })
 
 }
 
+function hideAddNewAssignmentButton(categoryID) {
+    console.log(categoryID)
+    const NewAssignmentButton = document.querySelector(`.category-section[data-category-id="${categoryID}"]
+    `).querySelector('.new-assignment-button')
+    console.log(NewAssignmentButton)
+    NewAssignmentButton.classList.add("hidden")
+
+    // new-assignment-button
+}
+
 function addNewAssignment(event) {
-    console.log(event.target)
+    console.log(event.target.parentNode)
+
     //un-hide new-assignments-section with the id
-    const catID = event.target.getAttribute('data-category-id');
+    const catID = event.target.parentNode.getAttribute('data-category-id');
+    hideAddNewAssignmentButton(catID)
     const newAssDiv = document.querySelector(`.new-assignments-section[data-category-id="${catID}"]`)
     newAssDiv.classList.remove("hidden")
     //add inputs into newAssDiv
@@ -297,6 +337,7 @@ function addNewAssignment(event) {
 // }
 
 function renderEditButton(courseID) {
+    //for when u load the course, not to unhide after a hide... for that, use unhideEditButton
     // console.log(document.getElementById('edit-score-button'))
     const editScoreButton = elements.editScoreButton();
     editScoreButton.classList.remove('hidden')
@@ -311,6 +352,21 @@ function renderEditButton(courseID) {
     // editButton.innerText = `Edit Scores`
     // elements.mainPanel().appendChild(editButton)
     // editButton.addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
+
+}
+
+function unhideEditButton() {
+    const editScoreButton = elements.editScoreButton();
+    editScoreButton.classList.remove('hidden')
+
+}
+
+
+function renderCourseTitle(courseObject) {
+    const courseTitle = courseObject.name;
+    const courseTitleElem = elements.courseTitleElem()
+    courseTitleElem.classList.remove("hidden")
+    courseTitleElem.innerHTML = `<h1 class="header">${courseTitle}</h1>`
 
 }
 
@@ -416,12 +472,14 @@ function locallyUpdateAssignment(event) {
 
 
 }
+
 function renderSubmitEditButton(courseID) {
     //find button, un-hide, add id,
     const finishEditButton = elements.submitEditButton();
     finishEditButton.classList.remove('hidden')
     finishEditButton.setAttribute("data-course-id", courseID)
-    finishEditButton.addEventListener("click", function(event) { submitEditChanges(courseID) })
+    finishEditButton.addEventListener("click", function(event) { 
+    submitEditChanges(courseID) })
 
 };
 
@@ -445,8 +503,8 @@ function submitEditChanges(courseID) {
     //turn off 'save changes' button
     const finishEditButton = elements.submitEditButton();
     finishEditButton.classList.add('hidden')
-
-
+    //add back "edit" button
+    unhideEditButton()
 };
 
 
@@ -478,6 +536,8 @@ function updateAssignment(id, name, score, outOf, rerender = false, courseID = n
     then(function(json) { 
         console.log(json)
     if (rerender === true ) {
+        console.log(` course id is: ${courseID} `);
+        //make sure course id is passed in!!!
         fetchAndDisplayCourseContent(courseID)
     }
  })
@@ -486,19 +546,31 @@ function updateAssignment(id, name, score, outOf, rerender = false, courseID = n
 
 function displayAssignment(assignment, catElement) {
     const divElem = document.createElement('div');
-    divElem.className = "assignment-row"
+    divElem.className = "assignment-row item"
     divElem.setAttribute("data-assignment-id", assignment.id)
     divElem.innerHTML = `
-    <div class="assignment-content" data-assignment-id="${assignment.id}">
-    <div class="name" data-label="name" data-assignment-id="${assignment.id}">${assignment.name}</div>
-    <div class="score" data-label="score" data-assignment-id="${assignment.id}">${assignment.score}</div>
-    <div class="out-of" data-label="outOf" data-assignment-id="${assignment.id}">${assignment.outOf}</div>
-    </div>
-    <div class="assignment-delete-button" data-assignment-id="${assignment.id}">
-        <a href="#">Delete</a>
-    </div>
+    <img class="ui avatar image" src="https://semantic-ui.com/images/avatar2/small/lena.png">
+
+    <div class="content">
+        <div class="assignment-content" data-assignment-id="${assignment.id}">
+            <a class="header name" data-label="name" data-assignment-id="${assignment.id}">${assignment.name}</a>
+            <span class="score" data-label="score" data-assignment-id="${assignment.id}">${assignment.score}</span>
+            / 
+            <span class="out-of" data-label="outOf" data-assignment-id="${assignment.id}">${assignment.outOf}</span>
+        </div>
+        
+  </div>
+
+  <div class="right floated content">
+    <a href="#" class="assignment-delete-button ui button" data-assignment-id="${assignment.id}">Delete</a>
+
+</div>
+
+
+
     `;
-    catElement.appendChild(divElem)
+    const categoryMainContent = catElement.querySelector('.category-main-content')
+    categoryMainContent.appendChild(divElem)
 
     let assignmentDeleteButton = function() { return document.querySelector(`.assignment-delete-button[data-assignment-id="${assignment.id}"]`) }
 
