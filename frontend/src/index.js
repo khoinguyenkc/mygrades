@@ -133,7 +133,7 @@ function fetchAndDisplayCourseTitles() {
 function initializeApp() {
     fetchAndDisplayCourseTitles()
     elements.editScoreButton().addEventListener("click", function(event) { editScores(elements.editScoreButton().getAttribute("data-course-id"))})
-    window.onscroll = function() { makeCourseMenuSticky()};
+    // window.onscroll = function() { makeCourseMenuSticky()};
 
 }
 initializeApp()
@@ -200,22 +200,24 @@ function displayCourseContent(courseObject) {
     //this can be called several times. so we have to clear it first:
     elements.assignmentsTable().innerHTML = '';
     //should later change the html structure in index.thml so we dont celar innerHTML like this...
-
+    elements.courseMenuBar().classList.remove('hidden')
     renderCourseTitle(courseObject)
     rendergradePercentage(courseObject)
     renderEditButton(courseObject.id)
+    //this ess below needs to be made into a function
     courseObject.categories.forEach( function(category) { 
         //goal: create a category section
         const catElement = document.createElement('div');
         catElement.className = "category-section";
         catElement.setAttribute("data-category-id", category.id);
         catElement.innerHTML = `
-        <h3 class="category-name header">${category.name}</h3>
-        <div class="new-assignment-button" data-category-id="${category.id}">
-            <div class=" ui primary button" >Add New Assignments</div>
-        </div>
-        <div class="ui middle aligned divided list category-main-content">
-        </div>
+                <h3 class="category-name header">${category.name.toUpperCase()}</h3>
+                <h4 class="category-weight">Weight: ${category.weight * 100}%</h4>
+                <div class="new-assignment-button" data-category-id="${category.id}">
+                    <div class=" ui primary button" >Add New Assignments</div>
+                </div>
+            <div class="ui middle aligned divided list category-main-content">
+            </div>
         `
         elements.assignmentsTable().appendChild(catElement)
 
@@ -235,6 +237,9 @@ function displayCourseContent(courseObject) {
 
         
     })
+
+
+    
     elements.newAssignmentButtons().forEach( function(button) { button.addEventListener("click", addNewAssignment)})
     elements.submitNewAssignmentsButtons().forEach( function(button) { button.addEventListener("click", submitNewAssignments )})
 }
@@ -375,7 +380,8 @@ function rendergradePercentage(courseObject) {
     const percentage = courseObject.grade_percentage()
     const percentageElem = elements.percentageElem()
     percentageElem.classList.remove("hidden")
-    percentageElem.innerText = `Class Percentage: ${percentage}%`
+    percentageElem.innerHTML= `<h3 class="header" >Overall Class Percentage: </h3>
+    <h1 class="header">${percentage}%</h1>`
 
 }
 function gradePercentage(courseObject) {    

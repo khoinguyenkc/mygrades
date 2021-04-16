@@ -6,6 +6,14 @@ div {
     /* border: 1px solid black; */
 }
 
+input {
+    margin: 2px;
+    border-radius: 4px;
+}
+
+.score input, .out-of input {
+    width: 70px;
+}
 #course-menu-bar {
     background-color: white;
 }
@@ -15,3 +23,33 @@ div {
     width: 100%;
   }
   
+.category-section {
+    margin: 50px;
+}
+
+#course-menu-bar {
+    margin: 50px;
+}
+
+#grade-percentage {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#courses-panel {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#courses-panel a {
+    margin-right: 20px;
+}
+
+#course-menu-bar {
+    
+    padding: 35px 25px;
+    background-color: #cce2ff;
+    border-radius: 10px;
+    border: 1px solid #276f86;
+    color: #276f86;
+}
