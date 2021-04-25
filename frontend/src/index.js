@@ -31,7 +31,10 @@ let elements = {
     names: function() { return document.querySelectorAll("div.category-section .name")},
     scores: function() { return document.querySelectorAll("div.category-section .score")},
     outOfs: function() { return document.querySelectorAll("div.category-section .out-of")},
-    courseMenuBar: function() { return document.getElementById("course-menu-bar");}
+    courseMenuBar: function() { return document.getElementById("course-menu-bar");},
+    createNewCourseButton: function() { return document.getElementById("create-new-course")},
+    newCourseFormDiv: function() { return document.getElementById("create-new-course-form")},
+    submitNewCourseButton: function() { return document.getElementById("submit-new-course")}
 
 };
 
@@ -134,12 +137,83 @@ function initializeApp() {
     fetchAndDisplayCourseTitles()
     elements.editScoreButton().addEventListener("click", function(event) { editScores(elements.editScoreButton().getAttribute("data-course-id"))})
     // window.onscroll = function() { makeCourseMenuSticky()};
-
+    elements.createNewCourseButton().addEventListener("click", function(event) { showNewCourseForm() })
 }
 initializeApp()
 
+function hideNewCourseForm() {
+        //UNHIDE the new course button
+        elements.createNewCourseButton().classList.remove('hidden');
+        //remove 
+
+}
+
+function submitNewCourse() {
+    console.log('submit new course called')
+    //extract info
+    //send info
+    //hide new course form
+    
+}
+function showNewCourseForm() {
+    //HIDE the new course button
+    console.log(elements.createNewCourseButton())
+    elements.createNewCourseButton().classList.add('hidden');
+    //UNHIDE big div and add elements 
+    const newCourseFormDiv = elements.newCourseFormDiv()
+    newCourseFormDiv.classList.remove("hidden")
+    const containerForRows = newCourseFormDiv.querySelector('.forRows');
+
+    //create title input
+    let titleInput = document.createElement("div");
+
+    titleInput.innerHTML = `
+    <label for="course-name">Course Title</label>
+    <input type="text" name="course-name" >`
+    //append title input
+    containerForRows.appendChild(titleInput)
+
+    function addCategoryRow(container) {
+        let newRow = document.createElement("div")
+        newRow.className = "new-category-row"
+        newRow.innerHTML = `
+            <p>
+            <label for="category-name">Category Name</label>
+            <input type="text" name="category-name" >
+            </p>
+            <p>
+            <label for="weight">Weight (in decimal form)</label>
+            <input type="text" name="weight" >
+            </p>
+        `
+        //append newRow... 5 times
+        container.appendChild(newRow)
+    
+    }
+    addCategoryRow(containerForRows)
+    addCategoryRow(containerForRows)
+    addCategoryRow(containerForRows)
+    addCategoryRow(containerForRows)
+    addCategoryRow(containerForRows)
 
 
+
+    //create submit  button
+    let submitNewCourseButton = document.createElement("input")
+    submitNewCourseButton.setAttribute('id','submit-new-course'); 
+    submitNewCourseButton.setAttribute('type','submit'); 
+    submitNewCourseButton.setAttribute('value','Add New Course'); 
+    submitNewCourseButton.classList = 'ui primary button';
+
+    //append submit button 
+    const containerForButtons = newCourseFormDiv.querySelector('.forButtons');
+    console.log(containerForButtons)
+    containerForButtons.append(submitNewCourseButton)
+
+    //add eventlistener to submit button
+    elements.submitNewCourseButton().addEventListener('click', () => { submitNewCourse() })
+
+}
 
 // Add the sticky class to the navbar when you reach its scroll position. Remove "sticky" when you leave the scroll position
 function makeCourseMenuSticky() {
@@ -204,50 +278,57 @@ function displayCourseContent(courseObject) {
     renderCourseTitle(courseObject)
     rendergradePercentage(courseObject)
     renderEditButton(courseObject.id)
-    //this ess below needs to be made into a function
-    courseObject.categories.forEach( function(category) { 
-        //goal: create a category section
-        const catElement = document.createElement('div');
-        catElement.className = "category-section";
-        catElement.setAttribute("data-category-id", category.id);
-        catElement.innerHTML = `
-                <h3 class="category-name header">${category.name.toUpperCase()}</h3>
-                <h4 class="category-weight">Weight: ${category.weight * 100}%</h4>
-                <div class="new-assignment-button" data-category-id="${category.id}">
-                    <div class=" ui primary button" >Add New Assignments</div>
-                </div>
-            <div class="ui middle aligned divided list category-main-content">
-            </div>
-        `
-        elements.assignmentsTable().appendChild(catElement)
+    courseObject.categories.forEach( function(category) { createACategorySection(category) } )
 
-        //goal: add assignment rows to the category section
-        category.assignments.forEach( function(assignment) { displayAssignment(assignment, catElement) })
-
-        //goal: add a hidden div to deal with user adding new assignments 
-        const newAssignmentsDiv = document.createElement('div');
-        newAssignmentsDiv.className = "new-assignments-section hidden";
-        newAssignmentsDiv.setAttribute("data-category-id", category.id);
-        newAssignmentsDiv.innerHTML = `
-        <div class="submit-new-assignments-button" data-category-id="${category.id}"><button class="ui primary button" >Submit New Assignments</button></div>
-        <div class="new-assignment-button" data-category-id="${category.id}"><button class="ui button">Add One More Assignment</button></div>
-
-        `
-        elements.assignmentsTable().appendChild(newAssignmentsDiv)
-
-        
-    })
-
-
-    
     elements.newAssignmentButtons().forEach( function(button) { button.addEventListener("click", addNewAssignment)})
     elements.submitNewAssignmentsButtons().forEach( function(button) { button.addEventListener("click", submitNewAssignments )})
 }
+
+function createACategorySection(category) { 
+    //goal: create a category section
+    const catElement = document.createElement('div');
+    catElement.className = "category-section";
+    catElement.setAttribute("data-category-id", category.id);
+    catElement.innerHTML = `
+            <h3 class="category-name header">${category.name.toUpperCase()}</h3>
+            <h4 class="category-weight">Weight: ${category.weight * 100}%</h4>
+            <div class="new-assignment-button" data-category-id="${category.id}">
+                <div class=" ui primary button" >Add New Assignments</div>
+            </div>
+        <div class="ui middle aligned divided list category-main-content">
+        </div>
+    `
+    elements.assignmentsTable().appendChild(catElement)
+
+    //goal: add assignment rows to the category section
+    category.assignments.forEach( function(assignment) { displayAssignment(assignment, catElement) })
+
+    //goal: add a hidden div to deal with user adding new assignments 
+    const newAssignmentsDiv = document.createElement('div');
+    newAssignmentsDiv.className = "new-assignments-section hidden";
+    newAssignmentsDiv.setAttribute("data-category-id", category.id);
+    newAssignmentsDiv.innerHTML = `
+    <div class="forRows">
+    </div>
+    <div class="submit-new-assignments-button" data-category-id="${category.id}">
+        <button class="ui primary button" >Submit New Assignments</button>
+    </div>
+    <div class="new-assignment-button" data-category-id="${category.id}">
+        <button class="ui button">Add One More Assignment</button>
+    </div>
+
+    `
+    elements.assignmentsTable().appendChild(newAssignmentsDiv)
+
+    
+}
+
 
 function submitNewAssignments(event) {
     //find the new-assignment-section div with that category id (dont use parent node, as that might change so easily)
     const catID = event.target.parentNode.getAttribute('data-category-id');
     const newAssDiv = document.querySelector(`.new-assignments-section[data-category-id="${catID}"]`)
+    
     //collect all new-assignment-rows
     const rows = newAssDiv.querySelectorAll('.new-assignment-row')
     //process each row: extract all relevant info and send!
@@ -306,17 +387,19 @@ function addNewAssignment(event) {
     hideAddNewAssignmentButton(catID)
     const newAssDiv = document.querySelector(`.new-assignments-section[data-category-id="${catID}"]`)
     newAssDiv.classList.remove("hidden")
-    //add inputs into newAssDiv
+    const containerForRows = newAssDiv.querySelector('.forRows');
+
+    //add inputs into containerForRows
     let newRow = document.createElement("div")
     newRow.className = "new-assignment-row"
     newRow.setAttribute("data-category-id", catID)
     newRow.innerHTML = `
-        <input type="text" name="name" data-category-id="${catID}">
-        <input type="text" name="score" data-category-id="${catID}">
-        <input type="text" name="out-of" data-category-id="${catID}">
+        <input type="text" name="name" value="Assignment Name" data-category-id="${catID}">
+        <input type="text" name="score" value="Score" data-category-id="${catID}">
+        <input type="text" name="out-of" value="Out Of"data-category-id="${catID}">
     `
     //append newRow...
-    newAssDiv.appendChild(newRow)
+    containerForRows.appendChild(newRow)
 
 }
 //OLD COPY KEEP as BACKUP
