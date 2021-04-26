@@ -1,5 +1,8 @@
 class CoursesController < ApplicationController
     def create 
+        course = Course.create(course_params) if !params[:name].empty?
+        render json: CourseSerializer.new(course).to_serialized_json
+
     end
 
     def show
@@ -24,4 +27,11 @@ class CoursesController < ApplicationController
 
     def delete
     end
+
+    private
+    def course_params
+        params.require(:course).permit(:id, :name, :category_ids => [])
+        #need id or it say invalid sql and lock database..
+    end
+
 end

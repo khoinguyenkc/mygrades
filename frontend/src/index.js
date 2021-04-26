@@ -134,6 +134,8 @@ function fetchAndDisplayCourseTitles() {
 }
 
 function initializeApp() {
+    //should add a function that clear all panels that might be showing. aka like a resetter
+    
     fetchAndDisplayCourseTitles()
     elements.editScoreButton().addEventListener("click", function(event) { editScores(elements.editScoreButton().getAttribute("data-course-id"))})
     // window.onscroll = function() { makeCourseMenuSticky()};
@@ -151,9 +153,52 @@ function hideNewCourseForm() {
 function submitNewCourse() {
     console.log('submit new course called')
     //extract info
-    //send info
+    const newCourseTitle = elements.newCourseFormDiv().querySelector(`input[name='course-name'`).value;
+    console.log(newCourseTitle);
+    //fetch POST course, receive couse ID, use courseid to create categories
+    fetchCreateCourse(newCourseTitle)
+    
     //hide new course form
     
+}
+
+function fetchCreateCourse(name) {
+    let data = {
+        name: "history"
+    };
+
+    let configurationObject = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(data)
+    };
+
+    fetch(`${COURSES_URL}`, configurationObject).
+    then( function(resource) { return resource.json() }).
+    then( function(json) { 
+       return console.log(json) }
+ 
+    )
+
+};
+
+
+function createCategories(courseID) {
+    const rows = elements.newCourseFormDiv().querySelectorAll('.new-category-row');
+
+    //send info
+    rows.forEach( function(row, index, array) {
+        const name = row.querySelector('input[name="category-name"]').value
+        const weight = row.querySelector('input[name="weight"]').value
+        // make fetch requeset
+        const rerender = ( index === array.length - 1) ? true : false;
+        fetchCreateCategories(courseID, name ,weight, rerender)
+
+    })
+
 }
 function showNewCourseForm() {
     //HIDE the new course button
@@ -342,6 +387,8 @@ function submitNewAssignments(event) {
 
     })
 }
+
+
 
 function fetchCreateAssignment(catID,name,score,outOf, rerender = false) {
     let data = {
