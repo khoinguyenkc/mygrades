@@ -1,4 +1,5 @@
 class CoursesController < ApplicationController
+    
     def create 
         course = Course.create(course_params) if !params[:name].empty?
         render json: CourseSerializer.new(course).to_serialized_json
@@ -17,7 +18,7 @@ class CoursesController < ApplicationController
     def index
         #later will only get courses of that user
         courses = Course.all
-            render json: courses, only: [:id, :name]
+        render json: courses, only: [:id, :name]
 
     end
 

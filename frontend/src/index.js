@@ -1,7 +1,7 @@
 const BASE_URL = "http://localhost:3000";
 const COURSES_URL = `${BASE_URL}/courses`;
 const ASSIGNMENTS_URL = `${BASE_URL}/assignments`;
-
+const CATEGORIES_URL = `${BASE_URL}/categories`;
 let currentCourseJSON;
 
 
@@ -133,9 +133,16 @@ function fetchAndDisplayCourseTitles() {
     then( function(json) { displayCourseTitles(json) })
 }
 
+function clearAllContent() {
+    //HIDE id main-panel
+    elements.mainPanel().classList.add('hidden')
+    //hide course form
+    hideNewCourseForm()
+}
+
 function initializeApp() {
     //should add a function that clear all panels that might be showing. aka like a resetter
-    
+    clearAllContent()
     fetchAndDisplayCourseTitles()
     elements.editScoreButton().addEventListener("click", function(event) { editScores(elements.editScoreButton().getAttribute("data-course-id"))})
     // window.onscroll = function() { makeCourseMenuSticky()};
@@ -146,7 +153,8 @@ initializeApp()
 function hideNewCourseForm() {
         //UNHIDE the new course button
         elements.createNewCourseButton().classList.remove('hidden');
-        //remove 
+        //remove the new course form div:
+        elements.newCourseFormDiv().classList.add('hidden');
 
 }
 
@@ -157,14 +165,14 @@ function submitNewCourse() {
     console.log(newCourseTitle);
     //fetch POST course, receive couse ID, use courseid to create categories
     fetchCreateCourse(newCourseTitle)
+    //categories creation, hiding course form, is handled in fetchCreateCourse because its async, we gotta wait for it whenever its ready
     
-    //hide new course form
     
 }
 
 function fetchCreateCourse(name) {
     let data = {
-        name: "history"
+        name: name
     };
 
     let configurationObject = {
@@ -179,10 +187,10 @@ function fetchCreateCourse(name) {
     fetch(`${COURSES_URL}`, configurationObject).
     then( function(resource) { return resource.json() }).
     then( function(json) { 
-       return console.log(json) }
+        createCategories(json.id) 
+    }
  
     )
-
 };
 
 
@@ -195,12 +203,53 @@ function createCategories(courseID) {
         const weight = row.querySelector('input[name="weight"]').value
         // make fetch requeset
         const rerender = ( index === array.length - 1) ? true : false;
-        fetchCreateCategories(courseID, name ,weight, rerender)
+        fetchCreateCategories(courseID, name , weight, rerender)
 
     })
 
 }
+
+function fetchCreateCategories(courseID, name , weight, rerender) {
+
+    let data = {
+        name: name,
+        weight: weight,
+        course_id: courseID
+    };
+
+    let configurationObject = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(data)
+    };
+
+    fetch(`${CATEGORIES_URL}`, configurationObject).
+    then( function(resource) { return resource.json() }).
+    then( function(json) { 
+        //WHAT DO I DO HERE
+        if (rerender) {
+            //hide div
+            hideNewCourseForm()
+            //rerender page as if from beginning
+            fetchAndDisplayCourseTitles()
+            console.log('last category created')
+        }
+        return 
+    
+
+    }
+ 
+    )
+
+};
+   
+
 function showNewCourseForm() {
+    //clear other content from tohoer "pages"
+    clearAllContent()
     //HIDE the new course button
     console.log(elements.createNewCourseButton())
     elements.createNewCourseButton().classList.add('hidden');
@@ -315,7 +364,13 @@ function fetchAndDisplayCourseContent(courseID) {
 
 }
 function displayCourseContent(courseObject) {
+    //clear other content from tohoer "pages"
+    clearAllContent()
+    //unhide main panel
+    elements.mainPanel().classList.remove('hidden')
+
     console.log(courseObject)
+    //SUPER IMPORTANT:
     //this can be called several times. so we have to clear it first:
     elements.assignmentsTable().innerHTML = '';
     //should later change the html structure in index.thml so we dont celar innerHTML like this...
