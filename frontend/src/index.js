@@ -34,8 +34,9 @@ let elements = {
     courseMenuBar: function() { return document.getElementById("course-menu-bar");},
     createNewCourseButton: function() { return document.getElementById("create-new-course")},
     newCourseFormDiv: function() { return document.getElementById("create-new-course-form")},
-    submitNewCourseButton: function() { return document.getElementById("submit-new-course")}
-
+    submitNewCourseButton: function() { return document.getElementById("submit-new-course")},
+    newCategoryFrame: function() { return document.getElementById("new-category-frame")},
+    startCreateCategory: function() { return document.getElementById("start-create-category")}
 };
 
 class Course {
@@ -378,12 +379,58 @@ function displayCourseContent(courseObject) {
     renderCourseTitle(courseObject)
     rendergradePercentage(courseObject)
     renderEditButton(courseObject.id)
+    renderAddCategoryButton(courseObject.id)
+    elements.startCreateCategory().addEventListener("click", processCreateACategoryClick );
     courseObject.categories.forEach( function(category) { createACategorySection(category) } )
 
     elements.newAssignmentButtons().forEach( function(button) { button.addEventListener("click", addNewAssignment)})
     elements.submitNewAssignmentsButtons().forEach( function(button) { button.addEventListener("click", submitNewAssignments )})
 }
 
+
+function processCreateACategoryClick() {
+    //get id    
+    const courseID = elements.startCreateCategory().getAttribute('data-course-id')
+    //remove button
+    removeAddCategoryButton()
+    //add button
+    renderSubmitACategoryButton(courseID)
+    //add input fields:
+    renderCreateACategoryForm()
+}
+
+function renderSubmitACategoryButton(courseID) {
+
+}
+
+function renderCreateACategoryForm() {
+    console.log(`renderCreateACategoryForm called`)
+}
+function removeAddCategoryButton() {
+    elements.startCreateCategory().remove()
+}
+function renderAddCategoryButton(courseID) {
+    const newCategoryFrame = elements.newCategoryFrame()
+
+    //create a dom node
+    const startCreateCategory = document.createElement('div')
+    startCreateCategory.setAttribute("id", "start-create-category")
+    startCreateCategory.setAttribute("data-course-id", courseID)
+    startCreateCategory.innerHTML = `
+    <button class="ui labeled icon button">
+        <i class="pause icon"></i>
+        Add A New Category
+    </button>
+    `;
+
+    //append dom node to newCategoryFrame
+    newCategoryFrame.appendChild(startCreateCategory);
+
+
+}
+
+
+//for the form with multiple inputs!!!!!!!
 function createACategorySection(category) { 
     //goal: create a category section
     const catElement = document.createElement('div');
@@ -438,6 +485,7 @@ function submitNewAssignments(event) {
         const outOf = row.querySelector('input[name="out-of"]').value
     // make fetch requeset
         const rerender = ( index === array.length - 1) ? true : false;
+        //temporarily disabling this for testing
         fetchCreateAssignment(catID,name,score,outOf, rerender)
 
     })
