@@ -35,8 +35,10 @@ let elements = {
     createNewCourseButton: function() { return document.getElementById("create-new-course")},
     newCourseFormDiv: function() { return document.getElementById("create-new-course-form")},
     submitNewCourseButton: function() { return document.getElementById("submit-new-course")},
-    newCategoryFrame: function() { return document.getElementById("new-category-frame")},
-    startCreateCategory: function() { return document.getElementById("start-create-category")}
+    courseMenuNewCategoryFrame: function() { return document.getElementById("course-menu-new-category-frame")},
+    startCreateCategory: function() { return document.getElementById("start-create-category")},
+    createNewCategoryForm: function() { return document.getElementById("create-new-category-form")},
+    submitNewCategoryButton: function() { return document.getElementById("submit-new-category")}
 };
 
 class Course {
@@ -139,6 +141,8 @@ function clearAllContent() {
     elements.mainPanel().classList.add('hidden')
     //hide course form
     hideNewCourseForm()
+    //remove content inside New Category Form (haven't built this form)
+
 }
 
 function initializeApp() {
@@ -334,7 +338,7 @@ function displayCourseTitles(array) {
 
         // courseElement.innerHTML =
         //  `<a class="course-link huge ui button" href="#" data-course-id="${course.id}">${course.name}</a>`
-        courseElement.className = "course-link huge ui button";
+        courseElement.className = "course-link large ui button";
         courseElement.setAttribute("data-course-id", course.id);
         courseElement.setAttribute("href", `#`); //for link hover effect
         courseElement.innerHTML = course.name;
@@ -391,34 +395,131 @@ function displayCourseContent(courseObject) {
 function processCreateACategoryClick() {
     //get id    
     const courseID = elements.startCreateCategory().getAttribute('data-course-id')
-    //remove button
+    //remove button. done
     removeAddCategoryButton()
-    //add button
-    renderSubmitACategoryButton(courseID)
-    //add input fields:
-    renderCreateACategoryForm()
+    // clear main contents: done
+    clearAllContent();
+    //unhide frame: done
+    const frame = elements.createNewCategoryForm();
+    frame.classList.remove('hidden');
+
+    //show form with input fields to form: done
+    renderCreateACategoryForm(frame, courseID);
+    //add event listener to submit button to process
+    elements.submitNewCategoryButton().addEventListener("click", processSubmitNewCategory )
+
+
 }
 
-function renderSubmitACategoryButton(courseID) {
+function processSubmitNewCategory() {
+    console.log(`processSubmitNewCategory called`)
+    //extract form data
+    const { courseID, name, weight } = extractNewCategoryFormData()
+    //fetch and display updated COURSE when done
+    fetchCreateOneCategory(courseID, name, weight)
+    //remove form from main panel
+    removeCreateNewCategoryForm()
+
+
+};
+
+function removeCreateNewCategoryForm() {
+    elements.createNewCategoryForm().remove()
+}
+
+
+ function fetchCreateOneCategory(courseID, name, weight, rerender = true) {
+
+    let data = {
+        name: name,
+        weight: weight,
+        course_id: courseID
+    };
+
+    let configurationObject = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(data)
+    };
+
+    fetch(`${CATEGORIES_URL}`, configurationObject).
+    then( function(resource) { return resource.json() }).
+    then( function(json) { 
+        console.log(json)
+        if (rerender) {
+            clearAllContent()
+            //reload the course with the new category
+            fetchAndDisplayCourseContent(courseID)
+
+        }
+    })
+
+ };
+
+function extractNewCategoryFormData() {
+    const courseID = elements.submitNewCategoryButton().getAttribute('data-course-id');
+
+    const row = elements.createNewCategoryForm().querySelector('.new-category-row');
+
+    const name = row.querySelector('input[name="category-name"]').value
+    const weight = row.querySelector('input[name="weight"]').value
+
+    // concise syntax. technically its {coureid: courseid, .....}
+    return { courseID, name, weight }
 
 }
 
-function renderCreateACategoryForm() {
+function renderCreateACategoryForm(frame, courseID) {
     console.log(`renderCreateACategoryForm called`)
+    //render just one category. no multiples!
+
+    let newRow = document.createElement("div")
+    newRow.className = "new-category-row"
+    newRow.innerHTML = `
+        <p>
+        <label for="category-name">Category Name</label>
+        <input type="text" name="category-name" >
+        </p>
+        <p>
+        <label for="weight">Weight (in decimal form)</label>
+        <input type="text" name="weight" >
+        </p>
+    `;
+
+    frame.appendChild(newRow);
+
+    const submitNewCategory = document.createElement('div')
+    submitNewCategory.setAttribute("id", "submit-new-category")
+    submitNewCategory.setAttribute("data-course-id", courseID)
+    submitNewCategory.innerHTML = `
+    <button class="ui labeled icon button">
+        <i class="plus square outline icon"></i>
+        Add A New Category
+    </button>
+    `;
+
+    frame.appendChild(submitNewCategory);
+
+
+
 }
 function removeAddCategoryButton() {
     elements.startCreateCategory().remove()
 }
 function renderAddCategoryButton(courseID) {
-    const newCategoryFrame = elements.newCategoryFrame()
-
+    const newCategoryFrame = elements.courseMenuNewCategoryFrame()
+    //clear if anything is existing:
+    newCategoryFrame.innerHTML = '';
     //create a dom node
     const startCreateCategory = document.createElement('div')
     startCreateCategory.setAttribute("id", "start-create-category")
     startCreateCategory.setAttribute("data-course-id", courseID)
     startCreateCategory.innerHTML = `
     <button class="ui labeled icon button">
-        <i class="pause icon"></i>
+        <i class="plus square outline icon"></i>
         Add A New Category
     </button>
     `;
@@ -440,7 +541,9 @@ function createACategorySection(category) {
             <h3 class="category-name header">${category.name.toUpperCase()}</h3>
             <h4 class="category-weight">Weight: ${category.weight * 100}%</h4>
             <div class="new-assignment-button" data-category-id="${category.id}">
-                <div class=" ui primary button" >Add New Assignments</div>
+                <div class=" ui primary button" >
+                    Add New Assignments
+                </div>
             </div>
         <div class="ui middle aligned divided list category-main-content">
         </div>
@@ -789,6 +892,7 @@ function displayAssignment(assignment, catElement) {
     divElem.setAttribute("data-assignment-id", assignment.id)
     divElem.innerHTML = `
     <img class="ui avatar image" src="https://semantic-ui.com/images/avatar2/small/lena.png">
+
 
     <div class="content">
         <div class="assignment-content" data-assignment-id="${assignment.id}">

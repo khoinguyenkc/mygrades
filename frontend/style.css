@@ -40,6 +40,9 @@ input {
     border-bottom: 1px solid grey;
 }
 
+.category-name.header {
+    color: #A52A2A;
+}
 #course-menu-bar {
     margin: 50px 0;
 }
