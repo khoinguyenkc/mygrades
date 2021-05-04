@@ -1,77 +1,8 @@
 
-const BASE_URL = "http://localhost:3000";
-const COURSES_URL = `${BASE_URL}/courses`;
-const ASSIGNMENTS_URL = `${BASE_URL}/assignments`;
-const CATEGORIES_URL = `${BASE_URL}/categories`;
-let currentCourseJSON;
 
 
-let currentCourseObjects = {
-    course: null,
-    categories: [],
-    assignments: []
-}
 
 
-let states = {
-    editModeOn: false
-};
-
-
-class Course {
-    constructor(id, name, categories = []){
-        this.id = id;
-        this.name = name;
-        this.categories = categories;
-    }
-
-    
-
-};
-
-Course.prototype.grade_percentage =  function() {    
-    //we change the argument to no agument. it wil use the THIS to refer to the course.
-    let percentages = []
-    let cats = this.categories
-    // #loop thru cats, and in there, loop thru assignments, 
-    cats.forEach( function(cat) {
-
-        let catScoreSum = 0;
-        let catOutOfSum = 0;
-        cat.assignments.forEach (function(assignment) {
-            catScoreSum += parseFloat(assignment.score)
-
-            catOutOfSum += parseFloat(assignment.outOf)
-        })
-        let percentage = cat.weight * (catScoreSum / catOutOfSum);
-
-        percentages.push(percentage)
-    })
-
-    const rawPerc = percentages.reduce( (acc, val) => acc + val, 0);
-    return (rawPerc * 100).toFixed(2)
-
-}
-
-
-class Category {
-    constructor(id, name, weight, course = null, assignments = [],){
-        this.id = id;
-        this.name = name;
-        this.weight = weight;
-        this.assignments = assignments;
-    }
-}
-
-class Assignment {
-    constructor(id, name, score, outOf, category = null){
-        this.id = id;
-        this.name = name;
-        this.score = score;
-        this.outOf = outOf;
-        this.category = category;
-    }
-}
 
 
 function updateCourseObjects(json) {
@@ -734,6 +665,8 @@ function updateAssignment(id, name, score, outOf, rerender = false, courseID = n
 }
 
 function displayAssignment(assignment, catElement) {
+    //will display one single assignment
+
     const divElem = document.createElement('div');
     divElem.className = "assignment-row item"
     divElem.setAttribute("data-assignment-id", assignment.id)
@@ -762,39 +695,9 @@ function displayAssignment(assignment, catElement) {
     const categoryMainContent = catElement.querySelector('.category-main-content')
     categoryMainContent.appendChild(divElem)
 
-    let assignmentDeleteButton = function() { return document.querySelector(`.assignment-delete-button[data-assignment-id="${assignment.id}"]`) }
-
-    assignmentDeleteButton().addEventListener("click", function() {
-        const assignmentID = assignmentDeleteButton().getAttribute('data-assignment-id')
-        deleteAssignment(assignmentID)
-    } )    
-
+    addListenerToDeleteButton(assignment)
 }
 
-function deleteAssignment(assignmentID) {
-    //find the section and change it to a "deleting..." message
-    const assignmentRow = document.querySelector(`.assignment-row[data-assignment-id="${assignmentID}"]`)
-    assignmentRow.innerHTML = "Deleting assignment..."
-    let data = {
-        id: assignmentID
-    };
-        
-    let configurationObject = {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify(data)
-        };
-        
-        fetch(`${ASSIGNMENTS_URL}/${assignmentID}`, configurationObject).
-            then( function(resource) { return resource.json() }).
-            then( function(json) { 
-                fetchAndDisplayCourseContent(currentCourseObjects.course.id) }
-         )
-        
-}
 //OLD COPY KEEP AS BACKUP
 // function displayAssignment(assignment, catElement) {
 //     const divElem = document.createElement('div');
