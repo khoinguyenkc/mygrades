@@ -1,3 +1,4 @@
+
 const BASE_URL = "http://localhost:3000";
 const COURSES_URL = `${BASE_URL}/courses`;
 const ASSIGNMENTS_URL = `${BASE_URL}/assignments`;
@@ -16,30 +17,6 @@ let states = {
     editModeOn: false
 };
 
-//we make these DOM nodes "live"
-let elements = {
-    coursePanel: function() {return document.getElementById('courses-panel')},
-    mainPanel: function() { return document.getElementById('main-panel')},
-    assignmentsTable: function() { return document.getElementById('assignments-table')},
-    assignmentRows: function() {return document.querySelectorAll(".assignment-row")},
-    percentageElem: function() {return document.querySelector("#grade-percentage")},
-    courseTitleElem: function() {return document.querySelector("#course-title")},
-    newAssignmentButtons: function() {return document.querySelectorAll(".new-assignment-button")},
-    submitNewAssignmentsButtons: function() {return document.querySelectorAll(".submit-new-assignments-button")},
-    editScoreButton: function() {return document.getElementById('edit-score-button')},
-    submitEditButton: function() {return document.getElementById('submit-edit-button')},
-    names: function() { return document.querySelectorAll("div.category-section .name")},
-    scores: function() { return document.querySelectorAll("div.category-section .score")},
-    outOfs: function() { return document.querySelectorAll("div.category-section .out-of")},
-    courseMenuBar: function() { return document.getElementById("course-menu-bar");},
-    createNewCourseButton: function() { return document.getElementById("create-new-course")},
-    newCourseFormDiv: function() { return document.getElementById("create-new-course-form")},
-    submitNewCourseButton: function() { return document.getElementById("submit-new-course")},
-    courseMenuNewCategoryFrame: function() { return document.getElementById("course-menu-new-category-frame")},
-    startCreateCategory: function() { return document.getElementById("start-create-category")},
-    createNewCategoryForm: function() { return document.getElementById("create-new-category-form")},
-    submitNewCategoryButton: function() { return document.getElementById("submit-new-category")}
-};
 
 class Course {
     constructor(id, name, categories = []){
@@ -170,8 +147,11 @@ function submitNewCourse() {
     console.log(newCourseTitle);
     //fetch POST course, receive couse ID, use courseid to create categories
     fetchCreateCourse(newCourseTitle)
-    //categories creation, hiding course form, is handled in fetchCreateCourse because its async, we gotta wait for it whenever its ready
     
+    //categories creation, hiding course form, is handled in fetchCreateCourse because its async, we gotta wait for it whenever its ready
+    //we're cancelling those features
+
+    hideNewCourseForm()
     
 }
 
@@ -192,7 +172,9 @@ function fetchCreateCourse(name) {
     fetch(`${COURSES_URL}`, configurationObject).
     then( function(resource) { return resource.json() }).
     then( function(json) { 
-        createCategories(json.id) 
+        initializeApp()
+
+            // createCategories(json.id) 
     }
  
     )
@@ -272,28 +254,28 @@ function showNewCourseForm() {
     //append title input
     containerForRows.appendChild(titleInput)
 
-    function addCategoryRow(container) {
-        let newRow = document.createElement("div")
-        newRow.className = "new-category-row"
-        newRow.innerHTML = `
-            <p>
-            <label for="category-name">Category Name</label>
-            <input type="text" name="category-name" >
-            </p>
-            <p>
-            <label for="weight">Weight (in decimal form)</label>
-            <input type="text" name="weight" >
-            </p>
-        `
-        //append newRow... 5 times
-        container.appendChild(newRow)
+    // function addCategoryRow(container) {
+    //     let newRow = document.createElement("div")
+    //     newRow.className = "new-category-row"
+    //     newRow.innerHTML = `
+    //         <p>
+    //         <label for="category-name">Category Name</label>
+    //         <input type="text" name="category-name" >
+    //         </p>
+    //         <p>
+    //         <label for="weight">Weight (in decimal form)</label>
+    //         <input type="text" name="weight" >
+    //         </p>
+    //     `
+    //     //append newRow... 5 times
+    //     container.appendChild(newRow)
     
-    }
-    addCategoryRow(containerForRows)
-    addCategoryRow(containerForRows)
-    addCategoryRow(containerForRows)
-    addCategoryRow(containerForRows)
-    addCategoryRow(containerForRows)
+    // }
+    // addCategoryRow(containerForRows)
+    // addCategoryRow(containerForRows)
+    // addCategoryRow(containerForRows)
+    // addCategoryRow(containerForRows)
+    // addCategoryRow(containerForRows)
 
 
 
@@ -332,6 +314,9 @@ function displayCourseTitles(array) {
     // let coursePanel = document.getElementById('courses-panel')
     console.log("hica nha")
     console.log(elements.coursePanel())
+    //clear coourse panel
+    elements.coursePanel().innerHTML = '';
+    //add courses
     array.forEach( function(course) { 
         // const courseElement = document.createElement('div');
         const courseElement = document.createElement('a');
@@ -391,144 +376,6 @@ function displayCourseContent(courseObject) {
     elements.submitNewAssignmentsButtons().forEach( function(button) { button.addEventListener("click", submitNewAssignments )})
 }
 
-
-function processCreateACategoryClick() {
-    //get id    
-    const courseID = elements.startCreateCategory().getAttribute('data-course-id')
-    //remove button. done
-    removeAddCategoryButton()
-    // clear main contents: done
-    clearAllContent();
-    //unhide frame: done
-    const frame = elements.createNewCategoryForm();
-    frame.classList.remove('hidden');
-
-    //show form with input fields to form: done
-    renderCreateACategoryForm(frame, courseID);
-    //add event listener to submit button to process
-    elements.submitNewCategoryButton().addEventListener("click", processSubmitNewCategory )
-
-
-}
-
-function processSubmitNewCategory() {
-    console.log(`processSubmitNewCategory called`)
-    //extract form data
-    const { courseID, name, weight } = extractNewCategoryFormData()
-    //fetch and display updated COURSE when done
-    fetchCreateOneCategory(courseID, name, weight)
-    //remove form from main panel
-    removeCreateNewCategoryForm()
-
-
-};
-
-function removeCreateNewCategoryForm() {
-    elements.createNewCategoryForm().remove()
-}
-
-
- function fetchCreateOneCategory(courseID, name, weight, rerender = true) {
-
-    let data = {
-        name: name,
-        weight: weight,
-        course_id: courseID
-    };
-
-    let configurationObject = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify(data)
-    };
-
-    fetch(`${CATEGORIES_URL}`, configurationObject).
-    then( function(resource) { return resource.json() }).
-    then( function(json) { 
-        console.log(json)
-        if (rerender) {
-            clearAllContent()
-            //reload the course with the new category
-            fetchAndDisplayCourseContent(courseID)
-
-        }
-    })
-
- };
-
-function extractNewCategoryFormData() {
-    const courseID = elements.submitNewCategoryButton().getAttribute('data-course-id');
-
-    const row = elements.createNewCategoryForm().querySelector('.new-category-row');
-
-    const name = row.querySelector('input[name="category-name"]').value
-    const weight = row.querySelector('input[name="weight"]').value
-
-    // concise syntax. technically its {coureid: courseid, .....}
-    return { courseID, name, weight }
-
-}
-
-function renderCreateACategoryForm(frame, courseID) {
-    console.log(`renderCreateACategoryForm called`)
-    //render just one category. no multiples!
-
-    let newRow = document.createElement("div")
-    newRow.className = "new-category-row"
-    newRow.innerHTML = `
-        <p>
-        <label for="category-name">Category Name</label>
-        <input type="text" name="category-name" >
-        </p>
-        <p>
-        <label for="weight">Weight (in decimal form)</label>
-        <input type="text" name="weight" >
-        </p>
-    `;
-
-    frame.appendChild(newRow);
-
-    const submitNewCategory = document.createElement('div')
-    submitNewCategory.setAttribute("id", "submit-new-category")
-    submitNewCategory.setAttribute("data-course-id", courseID)
-    submitNewCategory.innerHTML = `
-    <button class="ui labeled icon button">
-        <i class="plus square outline icon"></i>
-        Add A New Category
-    </button>
-    `;
-
-    frame.appendChild(submitNewCategory);
-
-
-
-}
-function removeAddCategoryButton() {
-    elements.startCreateCategory().remove()
-}
-function renderAddCategoryButton(courseID) {
-    const newCategoryFrame = elements.courseMenuNewCategoryFrame()
-    //clear if anything is existing:
-    newCategoryFrame.innerHTML = '';
-    //create a dom node
-    const startCreateCategory = document.createElement('div')
-    startCreateCategory.setAttribute("id", "start-create-category")
-    startCreateCategory.setAttribute("data-course-id", courseID)
-    startCreateCategory.innerHTML = `
-    <button class="ui labeled icon button">
-        <i class="plus square outline icon"></i>
-        Add A New Category
-    </button>
-    `;
-
-    //append dom node to newCategoryFrame
-    newCategoryFrame.appendChild(startCreateCategory);
-
-
-}
 
 
 //for the form with multiple inputs!!!!!!!
