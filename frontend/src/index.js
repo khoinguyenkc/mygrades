@@ -373,66 +373,6 @@ function submitNewAssignments(event) {
 }
 
 
-
-function fetchCreateAssignment(catID,name,score,outOf, rerender = false) {
-    let data = {
-        category_id: catID,
-        name,
-        score,
-        out_of: outOf
-    };
-
-    let configurationObject = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify(data)
-    };
-
-    fetch(`${ASSIGNMENTS_URL}`, configurationObject).
-    then( function(resource) { return resource.json() }).
-    then( function(json) { 
-        if (rerender === true) { 
-            fetchAndDisplayCourseContent(currentCourseObjects.course.id) }
- })
-
-}
-
-function hideAddNewAssignmentButton(categoryID) {
-    console.log(categoryID)
-    const NewAssignmentButton = document.querySelector(`.category-section[data-category-id="${categoryID}"]
-    `).querySelector('.new-assignment-button')
-    console.log(NewAssignmentButton)
-    NewAssignmentButton.classList.add("hidden")
-
-    // new-assignment-button
-}
-
-function addNewAssignment(event) {
-    console.log(event.target.parentNode)
-
-    //un-hide new-assignments-section with the id
-    const catID = event.target.parentNode.getAttribute('data-category-id');
-    hideAddNewAssignmentButton(catID)
-    const newAssDiv = document.querySelector(`.new-assignments-section[data-category-id="${catID}"]`)
-    newAssDiv.classList.remove("hidden")
-    const containerForRows = newAssDiv.querySelector('.forRows');
-
-    //add inputs into containerForRows
-    let newRow = document.createElement("div")
-    newRow.className = "new-assignment-row"
-    newRow.setAttribute("data-category-id", catID)
-    newRow.innerHTML = `
-        <input type="text" name="name" value="Assignment Name" data-category-id="${catID}">
-        <input type="text" name="score" value="Score" data-category-id="${catID}">
-        <input type="text" name="out-of" value="Out Of"data-category-id="${catID}">
-    `
-    //append newRow...
-    containerForRows.appendChild(newRow)
-
-}
 //OLD COPY KEEP as BACKUP
 // function displayCourseContent(json) {
 //     console.log(json)
@@ -455,70 +395,9 @@ function addNewAssignment(event) {
 //     })
 // }
 
-function renderEditButton(courseID) {
-    //for when u load the course, not to unhide after a hide... for that, use unhideEditButton
-    // console.log(document.getElementById('edit-score-button'))
-    const editScoreButton = elements.editScoreButton();
-    editScoreButton.classList.remove('hidden')
-    editScoreButton.setAttribute("data-course-id", courseID)
 
 
-    // editScoreButton.addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
 
-    // const editButton = document.createElement('a');
-    // editButton.className = "edit-button";
-    // editButton.setAttribute("data-course-id", courseID)
-    // editButton.innerText = `Edit Scores`
-    // elements.mainPanel().appendChild(editButton)
-    // editButton.addEventListener("click", function(event) { editScores(event.target.getAttribute("data-course-id"))})
-
-}
-
-function unhideEditButton() {
-    const editScoreButton = elements.editScoreButton();
-    editScoreButton.classList.remove('hidden')
-
-}
-
-
-function renderCourseTitle(courseObject) {
-    const courseTitle = courseObject.name;
-    const courseTitleElem = elements.courseTitleElem()
-    courseTitleElem.classList.remove("hidden")
-    courseTitleElem.innerHTML = `<h1 class="header">${courseTitle}</h1>`
-
-}
-
-function rendergradePercentage(courseObject) {
-    //goal: we want to make this able to display the first time AND to update
-    const percentage = courseObject.grade_percentage()
-    const percentageElem = elements.percentageElem()
-    percentageElem.classList.remove("hidden")
-    percentageElem.innerHTML= `<h3 class="header" >Overall Class Percentage: </h3>
-    <h1 class="header">${percentage}%</h1>`
-
-}
-function gradePercentage(courseObject) {    
-    let percentages = []
-    let cats = courseObject.categories
-    // #loop thru cats, and in there, loop thru assignments, 
-    cats.forEach( function(cat) {
-
-        let catScoreSum = 0;
-        let catOutOfSum = 0;
-        cat.assignments.forEach (function(assignment) {
-            catScoreSum += parseFloat(assignment.score)
-
-            catOutOfSum += parseFloat(assignment.outOf)
-        })
-        let percentage = cat.weight * (catScoreSum / catOutOfSum);
-
-        percentages.push(percentage)
-    })
-
-    return percentages.reduce( (acc, val) => acc + val, 0);
-
-}
 
 //OLD COPY KEEP AS BACKUP
 // function gradePercentage(json) {    
@@ -543,28 +422,20 @@ function gradePercentage(courseObject) {
 
 // }
 
+// ==========================================
+// ========EDIT SCORES CONTROLLER ===========
+// ==========================================
 function editScores(courseID) {
     console.log(`edit scores function was called`)
     states.editModeOn = true;
-    //toggle off edit button,
-    let editButton = document.getElementById("edit-score-button")
-    editButton.classList.add('hidden')
+    //toggle off edit button
+    hideEditScoreButton()
     // add finish edit button
     renderSubmitEditButton(courseID)
 
         
     //turn elements into input fields
-    let names = elements.names();
-    let scores = elements.scores();
-    let outOfs = elements.outOfs();
-    function replaceWithInputField(elem) {
-        let oldText = elem.innerText;
-        elem.innerHTML = `<input type="text" value="${oldText}" >`
-
-    }
-    elements.names().forEach( function(elem) { replaceWithInputField(elem) })
-    elements.scores().forEach( function(elem) { replaceWithInputField(elem) })
-    elements.outOfs().forEach( function(elem) { replaceWithInputField(elem) })
+    transformToEditScoresForm()
 
     //add event listeners for all these input fields to 
     //it will auto pass the EVENT as argument into the callback
@@ -575,6 +446,10 @@ function editScores(courseID) {
 
 }
 
+
+//--------------------------------------------------
+//is this even used?! like it seems not used. 
+// what is used in place of it??
 function locallyUpdateAssignment(event) {
     //event.target would give u the dom node, 
     //console log prinites old value but target.event.value gives u new value
@@ -593,110 +468,11 @@ function locallyUpdateAssignment(event) {
 
 }
 
-function renderSubmitEditButton(courseID) {
-    //find button, un-hide, add id,
-    const finishEditButton = elements.submitEditButton();
-    finishEditButton.classList.remove('hidden')
-    finishEditButton.setAttribute("data-course-id", courseID)
-    finishEditButton.addEventListener("click", function(event) { 
-    submitEditChanges(courseID) })
-
-};
-
-function submitEditChanges(courseID) {
-    // console.log(elements.assignmentRows()[0].getElementsByTagName('input')[0].value)
-    // console.log(elements.assignmentRows()[0])
-    // let row = elements.assignmentRows()[0]
-    elements.assignmentRows().forEach( function(row, index, array) { 
-        const id = row.getAttribute("data-assignment-id");
-        const name = row.querySelector('.name').querySelector('input').value;
-        const score = row.querySelector('.score').querySelector('input').value;
-        const outOf = row.querySelector('.out-of').querySelector('input').value;
-        const rerender = ( index === array.length - 1) ? true : false;
-            updateAssignment(id, name, score, outOf, rerender, courseID) 
-
-    })
-
-    //last assignment will call for rerender of course contetn
-    //then we update our state
-    states.editModeOn = false;
-    //turn off 'save changes' button
-    const finishEditButton = elements.submitEditButton();
-    finishEditButton.classList.add('hidden')
-    //add back "edit" button
-    unhideEditButton()
-};
 
 
 
-function updateAssignment(id, name, score, outOf, rerender = false, courseID = null) {
-    console.log(id)
-    console.log(name)
-    console.log(score)
-    console.log(outOf)
-    // fetch request to api to update:
-    let data = {
-        id,
-        name,
-        score,
-        out_of: outOf
-    };
-
-    let configurationObject = {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify(data)
-    };
-
-    fetch(`${ASSIGNMENTS_URL}/${id}`, configurationObject).
-    then( function(resource) { return resource.json() }).
-    then(function(json) { 
-        console.log(json)
-    if (rerender === true ) {
-        console.log(` course id is: ${courseID} `);
-        //make sure course id is passed in!!!
-        fetchAndDisplayCourseContent(courseID)
-    }
- })
-
-}
-
-function displayAssignment(assignment, catElement) {
-    //will display one single assignment
-
-    const divElem = document.createElement('div');
-    divElem.className = "assignment-row item"
-    divElem.setAttribute("data-assignment-id", assignment.id)
-    divElem.innerHTML = `
-    <img class="ui avatar image" src="https://semantic-ui.com/images/avatar2/small/lena.png">
 
 
-    <div class="content">
-        <div class="assignment-content" data-assignment-id="${assignment.id}">
-            <a class="header name" data-label="name" data-assignment-id="${assignment.id}">${assignment.name}</a>
-            <span class="score" data-label="score" data-assignment-id="${assignment.id}">${assignment.score}</span>
-            / 
-            <span class="out-of" data-label="outOf" data-assignment-id="${assignment.id}">${assignment.outOf}</span>
-        </div>
-        
-  </div>
-
-  <div class="right floated content">
-    <a href="#" class="assignment-delete-button ui button" data-assignment-id="${assignment.id}">Delete</a>
-
-</div>
-
-
-
-    `;
-    const categoryMainContent = catElement.querySelector('.category-main-content')
-    categoryMainContent.appendChild(divElem)
-
-    addListenerToDeleteButton(assignment)
-}
 
 //OLD COPY KEEP AS BACKUP
 // function displayAssignment(assignment, catElement) {

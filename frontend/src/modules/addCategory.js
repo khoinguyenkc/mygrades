@@ -114,9 +114,13 @@ function renderCreateACategoryForm(frame, courseID) {
 
 
 }
+
+
 function removeAddCategoryButton() {
     elements.startCreateCategory().remove()
 }
+
+
 function renderAddCategoryButton(courseID) {
     const newCategoryFrame = elements.courseMenuNewCategoryFrame()
     //clear if anything is existing:

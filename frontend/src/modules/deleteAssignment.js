@@ -1,3 +1,4 @@
+//refactor this to two parts: views and model 
 function deleteAssignment(assignmentID) {
     //find the section and change it to a "deleting..." message
     const assignmentRow = document.querySelector(`.assignment-row[data-assignment-id="${assignmentID}"]`)
